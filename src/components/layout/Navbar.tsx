@@ -17,7 +17,7 @@ import {
 import Image from 'next/image';
 
 export default function Navbar() {
-  const { role, setRole, activeTab, setActiveTab, activeShift, collaboratorName, setCollaboratorName } = useApp();
+  const { role, setRole, activeTab, setActiveTab, activeShift, collaboratorName, setCollaboratorName, isSupabaseLive } = useApp();
 
   const isShiftOpen = activeShift?.status === 'abierta';
 
@@ -91,7 +91,20 @@ export default function Navbar() {
           </nav>
 
           {/* Right Controls: Shift Badge + Role Switcher */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Supabase Status Pill */}
+            <div
+              className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border ${
+                isSupabaseLive
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amm-sand text-amm-roast border-amm-latte'
+              }`}
+              title={isSupabaseLive ? 'Sincronizado en tiempo real con Supabase' : 'Conectado a Supabase (ejecuta schema.sql para sincronizar tablas)'}
+            >
+              <span className={`w-2 h-2 rounded-full ${isSupabaseLive ? 'bg-emerald-500' : 'bg-amm-mauve animate-pulse'}`} />
+              <span>{isSupabaseLive ? 'Supabase Conectado' : 'Supabase Enlazado'}</span>
+            </div>
+
             {/* Shift Status Pill */}
             <button
               onClick={() => setActiveTab('caja')}
