@@ -3,10 +3,11 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 
 export const metadata: Metadata = {
-  title: 'Amm Café | Punto de Venta & Gestión',
-  description: 'Sistema integral de Punto de Venta, Inventario, Costeador Inteligente, Dashboard y Control de Turnos para Amm Café (Pan, Café & Bocados).',
+  title: 'Ammm Café | Punto de Venta & Gestión',
+  description: 'Sistema integral de Punto de Venta, Inventario, Costeador Inteligente, Dashboard y Control de Turnos para Ammm Café (Pan, Café & Bocados).',
   icons: {
-    icon: '/logo.svg',
+    icon: '/logo-circle.svg',
+    apple: '/logo-circle.png',
   },
 };
 

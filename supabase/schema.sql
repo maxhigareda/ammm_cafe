@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS public.pricing_recipes (
 
 -- ==============================================================================
 -- HABILITACIÓN DE SEGURIDAD (ROW LEVEL SECURITY) Y POLÍTICAS DE ACCESO
--- Permiten lectura y escritura desde la aplicación web de Amm Café
+-- Permiten lectura y escritura desde la aplicación web de Ammm Café
 -- ==============================================================================
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
@@ -152,7 +152,7 @@ INSERT INTO public.products (id, name, description, category, price, cost, image
 VALUES
 (
   'prod-1',
-  'Latte Amm Lavanda & Vainilla',
+  'Latte Ammm Lavanda & Vainilla',
   'Espresso de especialidad, leche vaporizada, notas florales de lavanda y extracto natural de vainilla.',
   'cafe',
   68,
@@ -299,7 +299,7 @@ VALUES
 ),
 (
   'prod-12',
-  'Combo Amm Mañanero',
+  'Combo Ammm Mañanero',
   'Café Latte o Americano Mediano + Croissant de Mantequilla o Rol de Canela.',
   'paquetes',
   98,
@@ -318,7 +318,7 @@ ON CONFLICT (id) DO UPDATE SET
 -- Insumos iniciales
 INSERT INTO public.supplies (id, name, unit, current_stock, min_stock, unit_cost, category)
 VALUES
-('sup-1', 'Café en Grano Especialidad (Mezcla Amm Chiapas/Oaxaca)', 'kg', 3.2, 5.0, 320, 'cafe_grano'),
+('sup-1', 'Café en Grano Especialidad (Mezcla Ammm Chiapas/Oaxaca)', 'kg', 3.2, 5.0, 320, 'cafe_grano'),
 ('sup-2', 'Leche Entera de Origen Local', 'L', 14, 12, 26, 'lacteos'),
 ('sup-3', 'Leche de Avena Edición Barista', 'L', 3, 6, 58, 'lacteos'),
 ('sup-4', 'Leche de Almendra sin Azúcar', 'L', 5, 4, 52, 'lacteos'),
@@ -350,7 +350,7 @@ INSERT INTO public.pricing_recipes (id, product_name, category, ingredients, pac
 VALUES
 (
   'rec-1',
-  'Latte Amm Lavanda (12 oz)',
+  'Latte Ammm Lavanda (12 oz)',
   'cafe',
   '[
     {"id":"ing-1","name":"Café en grano (18g)","quantity":"18g","cost":5.76},

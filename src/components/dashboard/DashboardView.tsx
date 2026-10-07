@@ -94,7 +94,7 @@ export default function DashboardView() {
             Dashboard & Analítica
           </h1>
           <p className="text-xs text-amm-roast mt-0.5">
-            Rendimiento en vivo de ventas, márgenes y métodos de cobro en Amm Café.
+            Rendimiento en vivo de ventas, márgenes y métodos de cobro en Ammm Café.
           </p>
         </div>
 

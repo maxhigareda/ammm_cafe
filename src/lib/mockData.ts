@@ -3,7 +3,7 @@ import { Product, SupplyItem, SupplyRequest, Expense, PricingRecipe, CashShift }
 export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-1',
-    name: 'Latte Amm Lavanda & Vainilla',
+    name: 'Latte Ammm Lavanda & Vainilla',
     description: 'Espresso de especialidad, leche vaporizada, notas florales de lavanda y extracto natural de vainilla.',
     category: 'cafe',
     price: 68,
@@ -211,7 +211,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: 'prod-12',
-    name: 'Combo Amm Mañanero',
+    name: 'Combo Ammm Mañanero',
     description: 'Café Latte o Americano Mediano + Croissant de Mantequilla o Rol de Canela.',
     category: 'paquetes',
     price: 98,
@@ -225,7 +225,7 @@ export const INITIAL_PRODUCTS: Product[] = [
 export const INITIAL_SUPPLIES: SupplyItem[] = [
   {
     id: 'sup-1',
-    name: 'Café en Grano Especialidad (Mezcla Amm Chiapas/Oaxaca)',
+    name: 'Café en Grano Especialidad (Mezcla Ammm Chiapas/Oaxaca)',
     unit: 'kg',
     currentStock: 3.2,
     minStock: 5.0, // Alerta
@@ -388,7 +388,7 @@ export const INITIAL_EXPENSES: Expense[] = [
   },
   {
     id: 'exp-5',
-    description: 'Compra de bolsas kraft y stickers de logo Amm',
+    description: 'Compra de bolsas kraft y stickers de logo Ammm',
     category: 'insumos',
     amount: 850,
     type: 'variable',
@@ -400,7 +400,7 @@ export const INITIAL_EXPENSES: Expense[] = [
 export const INITIAL_RECIPES: PricingRecipe[] = [
   {
     id: 'rec-1',
-    productName: 'Latte Amm Lavanda (12 oz)',
+    productName: 'Latte Ammm Lavanda (12 oz)',
     category: 'cafe',
     ingredients: [
       { id: 'ing-1', name: 'Café en grano (18g)', quantity: '18g', cost: 5.76 },

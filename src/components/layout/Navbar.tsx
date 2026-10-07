@@ -46,17 +46,17 @@ export default function Navbar() {
           
           {/* Logo Brand */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('pos')}>
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amm-mauve/30 shadow-soft bg-amm-mauve/10 flex items-center justify-center p-1">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-xs flex items-center justify-center">
               <img 
-                src="/logo.svg" 
-                alt="Amm Café Logo" 
-                className="w-full h-full object-contain"
+                src="/logo-circle.svg" 
+                alt="Ammm Café Logo" 
+                className="w-full h-full object-cover"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-serif font-bold text-2xl tracking-wide text-amm-espresso">
-                  Amm
+                <span className="font-serif font-black text-2xl tracking-wide text-amm-espresso">
+                  Ammm
                 </span>
                 <span className="text-[11px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-amm-mint text-amm-espresso/80">
                   Café

@@ -56,17 +56,17 @@ export default function Sidebar() {
             onClick={() => setActiveTab('pos')}
             className="flex items-center gap-3.5 cursor-pointer group"
           >
-            <div className="w-11 h-11 rounded-2xl overflow-hidden bg-amm-mauve/10 border border-amm-mauve/20 flex items-center justify-center p-1.5 transition-transform group-hover:scale-105">
+            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 transition-transform group-hover:scale-105 shadow-xs">
               <img
-                src="/logo.svg"
-                alt="Amm Café"
-                className="w-full h-full object-contain"
+                src="/logo-circle.svg"
+                alt="Ammm Café"
+                className="w-full h-full object-cover"
               />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-serif font-bold text-xl tracking-tight text-amm-espresso">
-                  Amm
+                <span className="font-serif font-black text-xl tracking-tight text-amm-espresso">
+                  Ammm
                 </span>
                 <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-md bg-amm-mint text-emerald-950">
                   Café

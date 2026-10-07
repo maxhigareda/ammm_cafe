@@ -372,7 +372,7 @@ export default function ExpensesView() {
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-[#EDFDF3] border border-[#86CCA0]/60 text-center">
-                    <span className="text-[11px] font-semibold text-emerald-900 block">Sugerido Amm</span>
+                    <span className="text-[11px] font-semibold text-emerald-900 block">Sugerido Ammm</span>
                     <div className="font-serif font-black text-xl text-emerald-900 my-1">
                       ${Math.round(suggestedPrice)}
                     </div>

@@ -48,8 +48,8 @@ export default function Home() {
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[#EAE6DF]">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.svg" alt="Amm Café" className="w-8 h-8 object-contain" />
-          <span className="font-serif font-bold text-lg text-amm-espresso">Amm Café</span>
+          <img src="/logo-circle.svg" alt="Ammm Café" className="w-8 h-8 rounded-full object-cover shadow-xs" />
+          <span className="font-serif font-black text-lg text-amm-espresso">Ammm Café</span>
         </div>
 
         <button

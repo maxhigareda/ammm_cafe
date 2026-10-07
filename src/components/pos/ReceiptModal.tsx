@@ -43,13 +43,15 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
           >
             {/* Header */}
             <div className="text-center space-y-1 pb-3 border-b border-dashed border-amm-latte">
-              <div className="w-10 h-10 mx-auto rounded-full bg-amm-mauve/20 flex items-center justify-center text-amm-mauve-dark mb-1">
-                <Coffee className="w-5 h-5" />
-              </div>
+              <img
+                src="/logo-circle.svg"
+                alt="Ammm Café"
+                className="w-12 h-12 mx-auto rounded-full object-cover shadow-xs mb-1.5"
+              />
               <h2 className="font-serif font-black text-lg text-amm-espresso tracking-wide">
-                AMM CAFÉ
+                AMMM CAFÉ
               </h2>
-              <p className="text-[10px] uppercase tracking-widest text-amm-roast">
+              <p className="text-[10px] uppercase tracking-widest text-amm-roast font-medium">
                 Pan, Café & Bocados
               </p>
               <p className="text-[10px] text-amm-roast">
@@ -132,7 +134,7 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
               <p className="font-serif italic text-amm-espresso">
                 ¡Gracias por compartir tu momento con nosotros!
               </p>
-              <p className="tracking-wider">@amm.cafemx</p>
+              <p className="tracking-wider">@ammm.cafemx</p>
             </div>
           </div>
         </div>
