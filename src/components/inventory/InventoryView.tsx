@@ -5,12 +5,9 @@ import { useApp } from '@/context/AppContext';
 import { SupplyItem, SupplyRequest } from '@/types';
 import {
   Package,
-  AlertTriangle,
   Plus,
   Send,
   CheckCircle2,
-  Clock,
-  ShieldAlert,
   Search,
   Check,
   X,
@@ -82,274 +79,238 @@ export default function InventoryView() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className="flex-1 p-6 lg:p-8 space-y-6 bg-[#FAF8F5]">
       
-      {/* Top Banner / Hero */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-amm-latte shadow-soft">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amm-mauve/20 text-amm-mauve-dark">
-              {role === 'admin' ? 'Gestión Total de Almacén' : 'Control de Barra & Suministros'}
-            </span>
-          </div>
-          <h2 className="font-serif font-bold text-2xl text-amm-espresso">
-            Inventario & Faltantes
-          </h2>
-          <p className="text-xs text-amm-roast max-w-xl">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE6DF] pb-5">
+        <div>
+          <h1 className="font-serif font-bold text-2xl text-amm-espresso tracking-tight">
+            Inventario & Suministros
+          </h1>
+          <p className="text-xs text-amm-roast mt-0.5">
             {role === 'admin'
-              ? 'Supervisa existencias mínimas de materias primas, costos de insumos y aprueba compras solicitadas por el equipo de barra.'
-              : 'Revisa qué insumos están disponibles y envía solicitudes inmediatas al administrador cuando algo empiece a escasear.'}
+              ? 'Control de materias primas, costos y pedidos pendientes de la barra.'
+              : 'Existencias de barra y reporte rápido de insumos faltantes para compra.'}
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsRequestModalOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-soft transition-all active:scale-[0.98]"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-3.5 h-3.5" />
             <span>Reportar Faltante</span>
           </button>
 
           {role === 'admin' && (
             <button
               onClick={() => setIsAddSupplyModalOpen(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs shadow-soft transition-all active:scale-[0.98]"
+              className="px-4 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Nuevo Insumo</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-3xl bg-white border border-amm-latte shadow-xs">
-          <span className="text-[11px] text-amm-roast font-semibold">Total Insumos</span>
-          <div className="text-2xl font-black text-amm-espresso mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+          <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+            Total Insumos
+          </span>
+          <div className="font-serif font-black text-2xl text-amm-espresso">
             {supplies.length}
           </div>
         </div>
 
-        <div className="p-4 rounded-3xl bg-white border border-amm-latte shadow-xs">
-          <span className="text-[11px] text-amm-roast font-semibold flex items-center gap-1 text-amber-700">
-            <AlertTriangle className="w-3.5 h-3.5" /> Stock Bajo
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+          <span className="text-[11px] font-medium text-amber-800 uppercase tracking-wider block">
+            Stock Bajo
           </span>
-          <div className="text-2xl font-black text-amber-600 mt-1">
+          <div className="font-serif font-black text-2xl text-amber-700">
             {lowStockCount}
           </div>
         </div>
 
-        <div className="p-4 rounded-3xl bg-white border border-amm-latte shadow-xs">
-          <span className="text-[11px] text-amm-roast font-semibold flex items-center gap-1 text-rose-700">
-            <Clock className="w-3.5 h-3.5" /> Solicitudes Pendientes
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+          <span className="text-[11px] font-medium text-rose-800 uppercase tracking-wider block">
+            Solicitudes Pendientes
           </span>
-          <div className="text-2xl font-black text-rose-600 mt-1">
+          <div className="font-serif font-black text-2xl text-rose-700">
             {pendingRequestsCount}
           </div>
         </div>
 
         {role === 'admin' ? (
-          <div className="p-4 rounded-3xl bg-white border border-amm-latte shadow-xs">
-            <span className="text-[11px] text-amm-roast font-semibold">Valor Estimado Stock</span>
-            <div className="text-2xl font-black text-amm-mauve-dark mt-1">
-              ${supplies.reduce((sum, s) => sum + s.currentStock * s.unitCost, 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })} <span className="text-xs font-normal">MXN</span>
+          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+            <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+              Valor Estimado Stock
+            </span>
+            <div className="font-serif font-black text-2xl text-amm-mauve-dark">
+              ${supplies.reduce((sum, s) => sum + s.currentStock * s.unitCost, 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })} <span className="text-xs font-sans font-normal text-amm-roast">MXN</span>
             </div>
           </div>
         ) : (
-          <div className="p-4 rounded-3xl bg-white border border-amm-latte shadow-xs">
-            <span className="text-[11px] text-amm-roast font-semibold">Estado de Barra</span>
-            <div className="text-sm font-bold text-emerald-700 mt-2 flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+            <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+              Estado de Barra
+            </span>
+            <div className="text-xs font-bold text-emerald-800 pt-1 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Operando Normal
             </div>
           </div>
         )}
       </div>
 
-      {/* Pending Procurement Requests Section */}
-      <div className="bg-white rounded-3xl border border-amm-latte shadow-card overflow-hidden">
-        <div className="p-4 border-b border-amm-latte/60 flex items-center justify-between bg-amm-sand/30">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-amber-100 text-amber-800">
-              <ShieldAlert className="w-4 h-4" />
-            </div>
-            <h3 className="font-serif font-bold text-base text-amm-espresso">
-              Solicitudes de Compra Levantadas por el Equipo
-            </h3>
+      {/* Pending Requests Section (if any) */}
+      {supplyRequests.length > 0 && (
+        <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
+          <div className="p-5 border-b border-[#F2ECE4] flex items-center justify-between">
+            <h2 className="font-serif font-bold text-base text-amm-espresso">
+              Solicitudes de Compra del Equipo
+            </h2>
+            <span className="text-xs text-amm-roast">
+              {pendingRequestsCount} pendientes
+            </span>
           </div>
-          <span className="text-xs text-amm-roast font-medium">
-            {supplyRequests.length} registradas
-          </span>
-        </div>
 
-        <div className="p-4 divide-y divide-amm-latte/40">
-          {supplyRequests.length > 0 ? (
-            supplyRequests.map((req) => {
+          <div className="p-5 divide-y divide-[#F5F2EB]">
+            {supplyRequests.map((req) => {
               const isPending = req.status === 'pendiente';
 
               return (
-                <div key={req.id} className="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
+                <div key={req.id} className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-amm-espresso">
+                      <span className="font-medium text-amm-espresso">
                         {req.supplyName}
                       </span>
                       {req.quantityNeeded && (
-                        <span className="px-2 py-0.5 rounded-lg bg-amm-sand text-amm-roast text-xs font-semibold">
+                        <span className="text-[11px] text-amm-roast px-1.5 py-0.5 rounded bg-[#FAF8F5]">
                           {req.quantityNeeded}
                         </span>
                       )}
-                      <span
-                        className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                          req.urgency === 'alta'
-                            ? 'bg-rose-100 text-rose-800'
-                            : req.urgency === 'media'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-emerald-100 text-emerald-800'
-                        }`}
-                      >
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        req.urgency === 'alta' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                      }`}>
                         Urgencia {req.urgency}
                       </span>
                     </div>
 
-                    <p className="text-xs text-amm-roast">
-                      {req.notes || 'Sin notas adicionales.'}
+                    <p className="text-[11px] text-amm-roast">
+                      {req.notes || 'Sin observaciones.'} • Por {req.requestedBy}
                     </p>
-
-                    <div className="text-[10px] text-amm-roast/80 flex items-center gap-3">
-                      <span>Solicitado por: <strong>{req.requestedBy}</strong></span>
-                      <span>•</span>
-                      <span>{req.requestedAt}</span>
-                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 self-end sm:self-center">
                     {isPending ? (
-                      <>
-                        <span className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
-                          Pendiente
-                        </span>
-
-                        {role === 'admin' && (
-                          <button
-                            onClick={() => updateSupplyRequestStatus(req.id, 'comprado')}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Marcar Comprado</span>
-                          </button>
-                        )}
-                      </>
+                      role === 'admin' && (
+                        <button
+                          onClick={() => updateSupplyRequestStatus(req.id, 'comprado')}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-colors"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Marcar Comprado</span>
+                        </button>
+                      )
                     ) : (
-                      <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Comprado
+                      <span className="text-emerald-700 text-xs font-medium flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Comprado
                       </span>
                     )}
                   </div>
                 </div>
               );
-            })
-          ) : (
-            <p className="py-6 text-center text-xs text-amm-roast italic">
-              No hay solicitudes de compra pendientes.
-            </p>
-          )}
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Supplies Table */}
-      <div className="bg-white rounded-3xl border border-amm-latte shadow-card overflow-hidden">
-        <div className="p-4 border-b border-amm-latte/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amm-sand/30">
-          <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 text-amm-mauve" />
-            <h3 className="font-serif font-bold text-base text-amm-espresso">
-              Catálogo de Existencias de Insumos Base
-            </h3>
-          </div>
+      <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
+        <div className="p-5 border-b border-[#F2ECE4] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="font-serif font-bold text-base text-amm-espresso">
+            Existencias de Insumos Base
+          </h2>
 
           <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amm-roast" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amm-roast/60" />
             <input
               type="text"
-              placeholder="Filtrar insumo..."
+              placeholder="Buscar insumo..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white border border-amm-latte focus:outline-none focus:ring-2 focus:ring-amm-mauve"
+              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] focus:outline-none focus:border-amm-mauve"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-amm-sand/50 text-amm-roast border-b border-amm-latte uppercase tracking-wider text-[10px]">
+            <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
               <tr>
-                <th className="py-3 px-4">Insumo</th>
-                <th className="py-3 px-4">Categoría</th>
-                <th className="py-3 px-4">Existencia Actual</th>
-                <th className="py-3 px-4">Stock Mínimo</th>
-                <th className="py-3 px-4">Estado</th>
+                <th className="py-3 px-5">Insumo</th>
+                <th className="py-3 px-5">Categoría</th>
+                <th className="py-3 px-5">Existencia</th>
+                <th className="py-3 px-5">Mínimo</th>
+                <th className="py-3 px-5">Estado</th>
                 {role === 'admin' && (
                   <>
-                    <th className="py-3 px-4">Costo Unitario</th>
-                    <th className="py-3 px-4 text-right">Ajuste Rápido</th>
+                    <th className="py-3 px-5">Costo Unitario</th>
+                    <th className="py-3 px-5 text-right">Ajuste</th>
                   </>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-amm-latte/40 text-amm-espresso">
+            <tbody className="divide-y divide-[#F5F2EB] text-amm-espresso">
               {filteredSupplies.map((item) => {
                 const isLow = item.currentStock <= item.minStock;
 
                 return (
-                  <tr key={item.id} className="hover:bg-amm-cream/50 transition-colors">
-                    <td className="py-3.5 px-4 font-bold">
+                  <tr key={item.id} className="hover:bg-[#FAF8F5] transition-colors">
+                    <td className="py-3.5 px-5 font-medium">
                       {item.name}
                     </td>
-                    <td className="py-3.5 px-4 capitalize text-amm-roast">
+                    <td className="py-3.5 px-5 capitalize text-amm-roast">
                       {item.category.replace('_', ' ')}
                     </td>
-                    <td className="py-3.5 px-4 font-extrabold text-sm">
-                      {item.currentStock} <span className="text-xs font-normal text-amm-roast">{item.unit}</span>
+                    <td className="py-3.5 px-5 font-serif font-bold text-sm">
+                      {item.currentStock} <span className="text-xs font-sans font-normal text-amm-roast">{item.unit}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-amm-roast">
+                    <td className="py-3.5 px-5 text-amm-roast">
                       {item.minStock} {item.unit}
                     </td>
-                    <td className="py-3.5 px-4">
-                      {isLow ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
-                          <AlertTriangle className="w-3 h-3" /> Faltante
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                        <span className={`text-[11px] font-medium ${isLow ? 'text-amber-700' : 'text-emerald-700'}`}>
+                          {isLow ? 'Faltante' : 'Óptimo'}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                          Óptimo
-                        </span>
-                      )}
+                      </div>
                     </td>
 
                     {role === 'admin' && (
                       <>
-                        <td className="py-3.5 px-4 font-medium text-amm-roast">
+                        <td className="py-3.5 px-5 text-amm-roast">
                           ${item.unitCost.toFixed(2)} / {item.unit}
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-5 text-right">
                           <div className="inline-flex items-center gap-1">
                             <button
                               onClick={() => updateSupplyStock(item.id, Math.max(0, item.currentStock - 1))}
-                              className="px-2 py-0.5 rounded-lg border border-amm-latte bg-white hover:bg-amm-sand font-bold text-xs text-amm-roast"
-                              title="Restar 1"
+                              className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-[#FAF8F5] text-xs font-bold text-amm-roast flex items-center justify-center"
                             >
-                              -1
+                              -
                             </button>
                             <button
                               onClick={() => updateSupplyStock(item.id, item.currentStock + 1)}
-                              className="px-2 py-0.5 rounded-lg border border-amm-latte bg-white hover:bg-amm-sand font-bold text-xs text-amm-roast"
-                              title="Sumar 1"
+                              className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-[#FAF8F5] text-xs font-bold text-amm-roast flex items-center justify-center"
                             >
-                              +1
+                              +
                             </button>
                           </div>
                         </td>
@@ -363,52 +324,49 @@ export default function InventoryView() {
         </div>
       </div>
 
-      {/* Modal: Report Shortage / Supply Request */}
+      {/* Modal: Report Shortage */}
       {isRequestModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-card border border-amm-latte p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-amm-latte">
-              <div className="flex items-center gap-2">
-                <Send className="w-4 h-4 text-amber-600" />
-                <h3 className="font-serif font-bold text-lg text-amm-espresso">
-                  Reportar Faltante o Insumo
-                </h3>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-sm w-full border border-[#EAE6DF] p-6 space-y-4 shadow-card">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F2ECE4]">
+              <h3 className="font-serif font-bold text-base text-amm-espresso">
+                Reportar Insumo Faltante
+              </h3>
               <button onClick={() => setIsRequestModalOpen(false)}>
-                <X className="w-5 h-5 text-amm-roast" />
+                <X className="w-4 h-4 text-amm-roast" />
               </button>
             </div>
 
             <form onSubmit={handleSendRequest} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
                   ¿Qué insumo hace falta? *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej: Leche de Avena, Vasos 12oz, Servilletas..."
+                  placeholder="Ej: Leche de Avena, Vasos 12 oz..."
                   value={reqSupplyName}
                   onChange={(e) => setReqSupplyName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
-                  Cantidad sugerida
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                  Cantidad aproximada
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej: 1 caja (12 L), 2 paquetes, 5 kg..."
+                  placeholder="Ej: 1 caja, 5 kg, 2 mangas..."
                   value={reqQuantity}
                   onChange={(e) => setReqQuantity(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
                   Urgencia
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -417,14 +375,10 @@ export default function InventoryView() {
                       key={urg}
                       type="button"
                       onClick={() => setReqUrgency(urg)}
-                      className={`py-2 rounded-xl text-xs font-bold capitalize border transition-all ${
+                      className={`py-1.5 rounded-xl text-xs font-semibold capitalize border transition-all ${
                         reqUrgency === urg
-                          ? urg === 'alta'
-                            ? 'bg-rose-600 text-white border-rose-600'
-                            : urg === 'media'
-                            ? 'bg-amber-600 text-white border-amber-600'
-                            : 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-amm-sand text-amm-roast border-amm-latte'
+                          ? 'bg-amm-espresso text-white border-amm-espresso'
+                          : 'bg-[#FAF8F5] text-amm-roast border-[#EAE6DF]'
                       }`}
                     >
                       {urg}
@@ -434,15 +388,15 @@ export default function InventoryView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
-                  Notas para la compra
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                  Notas adicionales
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Detalles adicionales sobre la marca, estado en barra..."
+                  placeholder="Observaciones de barra..."
                   value={reqNotes}
                   onChange={(e) => setReqNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
               </div>
 
@@ -450,15 +404,15 @@ export default function InventoryView() {
                 <button
                   type="button"
                   onClick={() => setIsRequestModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-amm-latte text-xs font-bold text-amm-roast"
+                  className="flex-1 py-2 rounded-xl border border-[#EAE6DF] text-xs font-semibold text-amm-roast"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-soft"
+                  className="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold"
                 >
-                  Enviar al Admin
+                  Enviar Reporte
                 </button>
               </div>
             </form>
@@ -466,63 +420,63 @@ export default function InventoryView() {
         </div>
       )}
 
-      {/* Modal: New Supply Item (Admin only) */}
+      {/* Modal: Add Supply Item (Admin only) */}
       {isAddSupplyModalOpen && role === 'admin' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-card border border-amm-latte p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-amm-latte">
-              <h3 className="font-serif font-bold text-lg text-amm-espresso">
-                Alta de Nuevo Insumo
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-sm w-full border border-[#EAE6DF] p-6 space-y-4 shadow-card">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F2ECE4]">
+              <h3 className="font-serif font-bold text-base text-amm-espresso">
+                Alta de Insumo
               </h3>
               <button onClick={() => setIsAddSupplyModalOpen(false)}>
-                <X className="w-5 h-5 text-amm-roast" />
+                <X className="w-4 h-4 text-amm-roast" />
               </button>
             </div>
 
             <form onSubmit={handleCreateSupply} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
                   Nombre del Insumo *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej: Jarabe de Avellana tostada"
+                  placeholder="Ej: Jarabe de Avellana"
                   value={newSupplyName}
                   onChange={(e) => setNewSupplyName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream focus:bg-white"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
-                    Unidad de Medida
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                    Unidad
                   </label>
                   <select
                     value={newSupplyUnit}
                     onChange={(e) => setNewSupplyUnit(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
-                    <option value="kg">kg (Kilogramos)</option>
-                    <option value="L">L (Litros)</option>
+                    <option value="kg">kg</option>
+                    <option value="L">L</option>
                     <option value="piezas">piezas</option>
                     <option value="paquetes">paquetes</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
                     Categoría
                   </label>
                   <select
                     value={newSupplyCategory}
                     onChange={(e) => setNewSupplyCategory(e.target.value as any)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
                     <option value="cafe_grano">Café Grano</option>
-                    <option value="lacteos">Lácteos & Bebidas</option>
-                    <option value="jarabes">Jarabes & Polvos</option>
+                    <option value="lacteos">Lácteos</option>
+                    <option value="jarabes">Jarabes</option>
                     <option value="desechables">Desechables</option>
                     <option value="panaderia_insumos">Panadería</option>
                     <option value="otros">Otros</option>
@@ -532,56 +486,56 @@ export default function InventoryView() {
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[11px] font-bold text-amm-espresso mb-1">
-                    Stock Inicial
+                  <label className="block text-[11px] font-semibold text-amm-espresso mb-1">
+                    Stock
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={newSupplyStock}
                     onChange={(e) => setNewSupplyStock(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-amm-latte"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-[#EAE6DF]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-amm-espresso mb-1">
-                    Stock Mínimo
+                  <label className="block text-[11px] font-semibold text-amm-espresso mb-1">
+                    Mínimo
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={newSupplyMin}
                     onChange={(e) => setNewSupplyMin(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-amm-latte"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-[#EAE6DF]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-amm-espresso mb-1">
-                    Costo Unitario ($)
+                  <label className="block text-[11px] font-semibold text-amm-espresso mb-1">
+                    Costo ($)
                   </label>
                   <input
                     type="number"
                     step="any"
                     value={newSupplyCost}
                     onChange={(e) => setNewSupplyCost(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-amm-latte"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-[#EAE6DF]"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-3">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsAddSupplyModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-amm-latte text-xs font-bold text-amm-roast"
+                  className="flex-1 py-2 rounded-xl border border-[#EAE6DF] text-xs font-semibold text-amm-roast"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white text-xs font-bold shadow-soft"
+                  className="flex-1 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white text-xs font-bold"
                 >
-                  Guardar Insumo
+                  Guardar
                 </button>
               </div>
             </form>

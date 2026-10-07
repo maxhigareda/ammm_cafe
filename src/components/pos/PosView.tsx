@@ -6,17 +6,11 @@ import { Category, Product, CartItem, Sale } from '@/types';
 import {
   Search,
   Coffee,
-  Croissant,
-  UtensilsCrossed,
-  GlassWater,
-  Cake,
-  Boxes,
   ShoppingBag,
   Trash2,
   Plus,
   Minus,
-  Sparkles,
-  AlertTriangle,
+  ArrowRight,
 } from 'lucide-react';
 import ProductModifierModal from './ProductModifierModal';
 import CheckoutModal from './CheckoutModal';
@@ -41,14 +35,14 @@ export default function PosView() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
 
-  const categories: { id: Category; label: string; icon: any }[] = [
-    { id: 'todos', label: 'Todos', icon: Boxes },
-    { id: 'cafe', label: 'Café', icon: Coffee },
-    { id: 'panaderia', label: 'Panadería', icon: Croissant },
-    { id: 'bocados', label: 'Bocados', icon: UtensilsCrossed },
-    { id: 'bebidas_frias', label: 'Bebidas Frías', icon: GlassWater },
-    { id: 'postres', label: 'Postres', icon: Cake },
-    { id: 'paquetes', label: 'Combos & Paquetes', icon: Sparkles },
+  const categories: { id: Category; label: string }[] = [
+    { id: 'todos', label: 'Todo el Menú' },
+    { id: 'cafe', label: 'Café & Especialidad' },
+    { id: 'panaderia', label: 'Panadería' },
+    { id: 'bocados', label: 'Bocados' },
+    { id: 'bebidas_frias', label: 'Bebidas Frías' },
+    { id: 'postres', label: 'Postres' },
+    { id: 'paquetes', label: 'Combos' },
   ];
 
   // Filter products
@@ -66,7 +60,6 @@ export default function PosView() {
     if (product.modifierGroups && product.modifierGroups.length > 0) {
       setActiveProductForModifier(product);
     } else {
-      // Add immediately if no modifiers needed
       const item: CartItem = {
         id: `item-${Date.now()}-${Math.random()}`,
         productId: product.id,
@@ -80,282 +73,278 @@ export default function PosView() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div className="flex-1 flex flex-col lg:flex-row min-h-screen bg-[#FAF8F5]">
+      
+      {/* Main Catalog Section (Left / Center) */}
+      <div className="flex-1 p-6 lg:p-8 space-y-6 overflow-y-auto">
         
-        {/* Left Column: Search, Categories & Products Grid (8 cols) */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-5">
-          
-          {/* Top Search & Stats */}
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amm-roast" />
+        {/* Top Header: Title, Search, and Category filters */}
+        <div className="space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-serif font-bold text-2xl text-amm-espresso tracking-tight">
+                Punto de Venta
+              </h1>
+              <p className="text-xs text-amm-roast mt-0.5">
+                Selecciona artículos del menú para añadirlos a la orden.
+              </p>
+            </div>
+
+            {/* Quiet, minimalist search */}
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-amm-roast/60" />
               <input
                 type="text"
-                placeholder="Buscar café, croissant, bocados, postres..."
+                placeholder="Buscar en el menú..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-amm-latte text-xs text-amm-espresso placeholder:text-amm-roast/60 focus:outline-none focus:ring-2 focus:ring-amm-mauve/50 shadow-xs"
+                className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-white border border-[#EAE6DF] text-amm-espresso placeholder:text-amm-roast/50 focus:outline-none focus:border-amm-mauve transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-amm-roast hover:text-amm-espresso font-bold"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-amm-roast hover:text-amm-espresso"
                 >
                   ✕
                 </button>
               )}
             </div>
-
-            <div className="text-xs text-amm-roast shrink-0 bg-amm-sand px-3 py-2 rounded-2xl border border-amm-latte">
-              <span className="font-bold text-amm-espresso">{filteredProducts.length}</span> artículos disponibles
-            </div>
           </div>
 
-          {/* Categories Pill Selector */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {/* Minimal Category Tabs */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-[#EAE6DF]/60">
             {categories.map((cat) => {
-              const Icon = cat.icon;
               const isSelected = selectedCategory === cat.id;
 
               return (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all shadow-xs ${
+                  className={`px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-all border-b-2 -mb-[1px] ${
                     isSelected
-                      ? 'bg-amm-mauve text-white shadow-soft font-bold scale-[1.02]'
-                      : 'bg-white text-amm-roast border border-amm-latte hover:border-amm-mauve/50 hover:bg-amm-cream'
+                      ? 'border-amm-mauve text-amm-mauve-dark font-bold'
+                      : 'border-transparent text-amm-roast hover:text-amm-espresso'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-amm-mauve'}`} />
-                  <span>{cat.label}</span>
+                  {cat.label}
                 </button>
               );
             })}
           </div>
+        </div>
 
-          {/* Product Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
-            {filteredProducts.map((prod) => {
-              const isLowStock = prod.isDirectStock && prod.stockQuantity !== undefined && prod.stockQuantity <= 4;
-              const isOutOfStock = !prod.inStock || (prod.isDirectStock && prod.stockQuantity === 0);
+        {/* Clean, Harmonious Product Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredProducts.map((prod) => {
+            const isLowStock = prod.isDirectStock && prod.stockQuantity !== undefined && prod.stockQuantity <= 4;
+            const isOutOfStock = !prod.inStock || (prod.isDirectStock && prod.stockQuantity === 0);
 
-              return (
-                <div
-                  key={prod.id}
-                  onClick={() => !isOutOfStock && handleProductClick(prod)}
-                  className={`group relative bg-white rounded-3xl overflow-hidden border border-amm-latte shadow-xs hover:shadow-card transition-all duration-200 flex flex-col text-left cursor-pointer active:scale-[0.98] ${
-                    isOutOfStock ? 'opacity-60 cursor-not-allowed bg-amm-sand/50' : 'hover:-translate-y-0.5'
-                  }`}
-                >
-                  {/* Image Container */}
-                  <div className="relative h-28 sm:h-32 w-full bg-amm-sand overflow-hidden">
-                    <img
-                      src={prod.imageUrl}
-                      alt={prod.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            return (
+              <div
+                key={prod.id}
+                onClick={() => !isOutOfStock && handleProductClick(prod)}
+                className={`group bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden flex flex-col justify-between text-left cursor-pointer transition-all hover:border-amm-mauve/60 active:scale-[0.99] ${
+                  isOutOfStock ? 'opacity-40 cursor-not-allowed' : 'hover:shadow-xs'
+                }`}
+              >
+                {/* Photo */}
+                <div className="relative aspect-[4/3] w-full bg-[#F5F2EB] overflow-hidden">
+                  <img
+                    src={prod.imageUrl}
+                    alt={prod.name}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                  />
+                  {isOutOfStock && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-black/60 px-2 py-0.5 rounded-md">
+                        Agotado
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                    {/* Price Pill */}
-                    <span className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-sm text-xs font-black text-amm-espresso shadow-xs border border-amm-latte/50">
-                      ${prod.price.toFixed(0)}
-                    </span>
+                {/* Details */}
+                <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-medium text-xs sm:text-sm text-amm-espresso leading-snug line-clamp-1">
+                        {prod.name}
+                      </h3>
+                      <span className="font-serif font-bold text-xs sm:text-sm text-amm-espresso shrink-0">
+                        ${prod.price.toFixed(0)}
+                      </span>
+                    </div>
 
-                    {/* Stock Alert Badge */}
-                    {isLowStock && !isOutOfStock && (
-                      <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/90 text-white text-[10px] font-bold shadow-xs backdrop-blur-xs">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span>¡Solo {prod.stockQuantity}!</span>
+                    <p className="text-[11px] text-amm-roast line-clamp-2 mt-1 leading-relaxed">
+                      {prod.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#F5F2EB]">
+                    {isLowStock && !isOutOfStock ? (
+                      <span className="text-amber-700 font-medium">
+                        • {prod.stockQuantity} disponibles
+                      </span>
+                    ) : (
+                      <span className="text-amm-roast/70 capitalize">
+                        {prod.category.replace('_', ' ')}
                       </span>
                     )}
 
-                    {isOutOfStock && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-2 text-center">
-                        <span className="text-white text-xs font-black uppercase tracking-wider bg-rose-600/90 px-2.5 py-1 rounded-full shadow-md">
-                          Agotado
-                        </span>
+                    <span className="text-amm-mauve-dark font-medium group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                      <span>Agregar</span>
+                      <Plus className="w-3 h-3 stroke-[2.5]" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="py-16 text-center space-y-2">
+            <Coffee className="w-8 h-8 text-amm-roast/40 mx-auto" />
+            <p className="font-serif text-sm font-medium text-amm-espresso">
+              No se encontraron productos
+            </p>
+            <p className="text-xs text-amm-roast">
+              Intenta con otra palabra clave o selecciona otra categoría.
+            </p>
+          </div>
+        )}
+
+      </div>
+
+      {/* Integrated Order Ledger / Ticket (Right Column) */}
+      <div className="w-full lg:w-96 shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-[#EAE6DF] flex flex-col justify-between h-auto lg:min-h-screen">
+        
+        {/* Ledger Header */}
+        <div className="p-6 pb-4 border-b border-[#F2ECE4] flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-serif font-bold text-lg text-amm-espresso">
+                Orden Actual
+              </span>
+              <span className="text-[11px] font-semibold text-amm-roast px-2 py-0.5 rounded-md bg-[#FAF8F5]">
+                {cartCount} {cartCount === 1 ? 'artículo' : 'artículos'}
+              </span>
+            </div>
+            <p className="text-[11px] text-amm-roast mt-0.5">
+              Atiende: <span className="font-medium text-amm-espresso">{collaboratorName}</span>
+            </p>
+          </div>
+
+          {cart.length > 0 && (
+            <button
+              onClick={clearCart}
+              className="text-[11px] text-amm-roast hover:text-rose-600 transition-colors flex items-center gap-1"
+              title="Vaciar orden"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Limpiar</span>
+            </button>
+          )}
+        </div>
+
+        {/* Scrollable Items List */}
+        <div className="p-6 flex-1 overflow-y-auto divide-y divide-[#F5F2EB] space-y-3">
+          {cart.length > 0 ? (
+            cart.map((item) => (
+              <div key={item.id} className="pt-3 first:pt-0 space-y-1.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-xs text-amm-espresso leading-snug">
+                      {item.product.name}
+                    </h4>
+
+                    {/* Modifiers List */}
+                    {Object.entries(item.selectedModifiers).map(([group, opts]) =>
+                      opts.map((opt) => (
+                        <div key={opt.id} className="text-[10px] text-amm-roast mt-0.5">
+                          + {opt.name} {opt.priceDelta > 0 && `(+$${opt.priceDelta})`}
+                        </div>
+                      ))
+                    )}
+
+                    {item.notes && (
+                      <div className="text-[10px] italic text-amm-mauve-dark mt-0.5">
+                        "{item.notes}"
                       </div>
                     )}
                   </div>
 
-                  {/* Body */}
-                  <div className="p-3 flex-1 flex flex-col justify-between gap-2">
-                    <div>
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-amm-espresso line-clamp-1 leading-snug">
-                        {prod.name}
-                      </h4>
-                      <p className="text-[10px] text-amm-roast line-clamp-2 mt-0.5">
-                        {prod.description}
-                      </p>
-                    </div>
+                  <span className="font-serif font-bold text-xs text-amm-espresso whitespace-nowrap">
+                    ${item.itemTotal.toFixed(2)}
+                  </span>
+                </div>
 
-                    <div className="flex items-center justify-between pt-1 border-t border-amm-latte/40">
-                      <span className="text-[10px] uppercase font-bold text-amm-mauve-dark">
-                        {prod.modifierGroups && prod.modifierGroups.length > 0 ? 'Personalizar' : 'Directo'}
-                      </span>
-                      <span className="w-6 h-6 rounded-full bg-amm-sand group-hover:bg-amm-mauve group-hover:text-white flex items-center justify-center text-amm-espresso transition-colors">
-                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </span>
-                    </div>
+                {/* Minimal Stepper */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="text-[10px] text-amm-roast">
+                    ${(item.itemTotal / item.quantity).toFixed(0)} c/u
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateCartItemQuantity(item.id, -1)}
+                      className="w-5 h-5 rounded-md border border-[#EAE6DF] hover:bg-[#FAF8F5] flex items-center justify-center text-amm-roast transition-colors"
+                    >
+                      <Minus className="w-2.5 h-2.5" />
+                    </button>
+                    <span className="w-4 text-center text-xs font-bold text-amm-espresso">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateCartItemQuantity(item.id, 1)}
+                      className="w-5 h-5 rounded-md border border-[#EAE6DF] hover:bg-[#FAF8F5] flex items-center justify-center text-amm-roast transition-colors"
+                    >
+                      <Plus className="w-2.5 h-2.5" />
+                    </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {filteredProducts.length === 0 && (
-            <div className="p-10 rounded-3xl bg-white border border-amm-latte text-center space-y-2">
-              <Coffee className="w-8 h-8 text-amm-mauve mx-auto opacity-60" />
-              <p className="font-serif font-bold text-sm text-amm-espresso">
-                No se encontraron artículos
+              </div>
+            ))
+          ) : (
+            <div className="py-16 text-center space-y-2">
+              <ShoppingBag className="w-6 h-6 text-amm-roast/30 mx-auto" />
+              <p className="font-serif text-xs font-medium text-amm-espresso">
+                Tu comanda está vacía
               </p>
-              <p className="text-xs text-amm-roast">
-                Intenta con otra palabra clave o selecciona otra categoría.
+              <p className="text-[11px] text-amm-roast/70">
+                Toca cualquier producto del menú para comenzar la orden.
               </p>
             </div>
           )}
-
         </div>
 
-        {/* Right Column: Order Ticket / Cart (4 cols) */}
-        <div className="lg:col-span-5 xl:col-span-4 bg-white rounded-3xl border border-amm-latte shadow-card overflow-hidden sticky top-24">
-          
-          {/* Ticket Header */}
-          <div className="p-4 border-b border-amm-latte/60 bg-amm-sand/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-2xl bg-amm-mauve/20 text-amm-mauve-dark">
-                <ShoppingBag className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-serif font-bold text-sm text-amm-espresso">
-                  Ticket de Venta
-                </h3>
-                <p className="text-[10px] text-amm-roast">
-                  Atiende: <span className="font-semibold text-amm-espresso">{collaboratorName}</span>
-                </p>
-              </div>
+        {/* Ledger Total & Action Footer */}
+        <div className="p-6 border-t border-[#F2ECE4] space-y-4 bg-[#FCFBF9]">
+          <div className="space-y-1.5 text-xs">
+            <div className="flex justify-between text-amm-roast">
+              <span>Subtotal:</span>
+              <span>${cartTotal.toFixed(2)}</span>
             </div>
-
-            {cart.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="p-1.5 rounded-xl hover:bg-rose-50 text-rose-600 transition-colors text-xs font-semibold flex items-center gap-1"
-                title="Vaciar ticket"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Vaciar</span>
-              </button>
-            )}
-          </div>
-
-          {/* Cart Items List */}
-          <div className="p-4 space-y-3 max-h-[50vh] overflow-y-auto divide-y divide-amm-latte/40">
-            {cart.length > 0 ? (
-              cart.map((item) => (
-                <div key={item.id} className="pt-3 first:pt-0 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h4 className="font-bold text-xs text-amm-espresso leading-snug">
-                        {item.product.name}
-                      </h4>
-                      
-                      {/* Modifiers selected tags */}
-                      {Object.entries(item.selectedModifiers).map(([group, opts]) =>
-                        opts.map((opt) => (
-                          <div key={opt.id} className="text-[10px] text-amm-roast mt-0.5">
-                            • {opt.name} {opt.priceDelta > 0 && `(+$${opt.priceDelta})`}
-                          </div>
-                        ))
-                      )}
-
-                      {item.notes && (
-                        <div className="text-[10px] italic text-amm-mauve-dark mt-0.5">
-                          Nota: {item.notes}
-                        </div>
-                      )}
-                    </div>
-
-                    <span className="font-extrabold text-xs text-amm-espresso whitespace-nowrap">
-                      ${item.itemTotal.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Quantity Stepper */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-amm-roast">
-                      ${(item.itemTotal / item.quantity).toFixed(2)} c/u
-                    </span>
-
-                    <div className="flex items-center bg-amm-sand border border-amm-latte rounded-xl p-0.5 shadow-2xs">
-                      <button
-                        onClick={() => updateCartItemQuantity(item.id, -1)}
-                        className="p-1 rounded-lg hover:bg-white text-amm-roast transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="w-6 text-center text-xs font-bold text-amm-espresso">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateCartItemQuantity(item.id, 1)}
-                        className="p-1 rounded-lg hover:bg-white text-amm-roast transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-12 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-full bg-amm-sand/80 flex items-center justify-center text-amm-mauve">
-                  <Coffee className="w-6 h-6 stroke-[1.5]" />
-                </div>
-                <div>
-                  <p className="font-serif font-bold text-xs text-amm-espresso">
-                    El ticket está vacío
-                  </p>
-                  <p className="text-[11px] text-amm-roast mt-0.5">
-                    Selecciona productos del menú para comenzar la orden.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Ticket Footer / Checkout Action */}
-          <div className="p-4 bg-amm-sand/40 border-t border-amm-latte space-y-3">
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between text-amm-roast">
-                <span>Artículos ({cartCount}):</span>
-                <span>${cartTotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-extrabold text-base text-amm-espresso pt-1 border-t border-amm-latte/60">
-                <span>Total a Cobrar:</span>
-                <span className="text-amm-mauve-dark font-black">
-                  ${cartTotal.toFixed(2)} MXN
-                </span>
-              </div>
-            </div>
-
-            <button
-              disabled={cart.length === 0}
-              onClick={() => setIsCheckoutOpen(true)}
-              className={`w-full py-3.5 px-4 rounded-2xl font-bold text-sm shadow-soft transition-all flex items-center justify-center gap-2 ${
-                cart.length > 0
-                  ? 'bg-amm-mauve hover:bg-amm-mauve-dark text-white active:scale-[0.98]'
-                  : 'bg-amm-latte text-amm-roast cursor-not-allowed'
-              }`}
-            >
-              <span>Cobrar Pedido</span>
-              <span className="font-black text-white/95">
-                (${cartTotal.toFixed(2)})
+            <div className="flex justify-between items-baseline pt-2 border-t border-[#F2ECE4]">
+              <span className="font-medium text-sm text-amm-espresso">Total a Cobrar:</span>
+              <span className="font-serif font-black text-2xl text-amm-espresso">
+                ${cartTotal.toFixed(2)} <span className="text-xs font-sans font-normal text-amm-roast">MXN</span>
               </span>
-            </button>
+            </div>
           </div>
 
+          <button
+            disabled={cart.length === 0}
+            onClick={() => setIsCheckoutOpen(true)}
+            className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+              cart.length > 0
+                ? 'bg-amm-mauve hover:bg-amm-mauve-dark text-white shadow-soft active:scale-[0.99]'
+                : 'bg-[#EDE7DE] text-amm-roast/60 cursor-not-allowed'
+            }`}
+          >
+            <span>Cobrar Pedido</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>
@@ -385,6 +374,7 @@ export default function PosView() {
         isOpen={Boolean(completedSale)}
         onClose={() => setCompletedSale(null)}
       />
+
     </div>
   );
 }

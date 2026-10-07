@@ -8,13 +8,9 @@ import {
   Receipt,
   Plus,
   Trash2,
-  TrendingUp,
-  DollarSign,
-  AlertCircle,
-  CheckCircle,
   ArrowRight,
   Sparkles,
-  PieChart,
+  X,
 } from 'lucide-react';
 
 export default function ExpensesView() {
@@ -29,7 +25,7 @@ export default function ExpensesView() {
     updateProduct,
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'gastos' | 'costeador'>('costeador');
+  const [activeSubTab, setActiveSubTab] = useState<'costeador' | 'gastos'>('costeador');
 
   // Expense Modal State
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -54,7 +50,6 @@ export default function ExpensesView() {
   const [newIngQty, setNewIngQty] = useState('');
   const [newIngCost, setNewIngCost] = useState('');
 
-  // Sync state when recipe selection changes
   const handleSelectRecipe = (id: string) => {
     setSelectedRecipeId(id);
     const rec = recipes.find((r) => r.id === id);
@@ -72,12 +67,10 @@ export default function ExpensesView() {
   const wasteCost = (rawIngredientsCost * wastePct) / 100;
   const totalCost = rawIngredientsCost + wasteCost + packagingCost;
 
-  // Formula: Suggested Price = Total Cost / (1 - TargetMargin)
   const suggestedPrice = totalCost / (1 - targetMargin / 100);
   const currentPrice = activeRecipe ? activeRecipe.currentSellingPrice : 0;
   const currentMargin = currentPrice > 0 ? ((currentPrice - totalCost) / currentPrice) * 100 : 0;
   const unitProfitSuggested = suggestedPrice - totalCost;
-  const unitProfitCurrent = currentPrice - totalCost;
 
   // Total Expenses calculation
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -134,7 +127,6 @@ export default function ExpensesView() {
     if (!activeRecipe) return;
     const roundedPrice = Math.round(suggestedPrice);
     
-    // Update recipe
     updateRecipe(activeRecipe.id, {
       currentSellingPrice: roundedPrice,
       targetMarginPercentage: targetMargin,
@@ -142,7 +134,6 @@ export default function ExpensesView() {
       packagingCost: packagingCost,
     });
 
-    // Also update product in live catalog if name matches
     const prod = products.find((p) => p.name.toLowerCase().includes(activeRecipe.productName.toLowerCase()) || activeRecipe.productName.toLowerCase().includes(p.name.toLowerCase()));
     if (prod) {
       updateProduct(prod.id, {
@@ -151,70 +142,62 @@ export default function ExpensesView() {
       });
     }
 
-    alert(`¡Precio de $${roundedPrice} MXN aplicado exitosamente al producto y menú POS!`);
+    alert(`¡Precio de $${roundedPrice} MXN aplicado al menú POS!`);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className="flex-1 p-6 lg:p-8 space-y-6 bg-[#FAF8F5]">
       
-      {/* Hero Header with Sub-tab switcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-amm-latte shadow-soft">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amm-mauve/20 text-amm-mauve-dark">
-              Finanzas & Estrategia de Precios
-            </span>
-          </div>
-          <h2 className="font-serif font-bold text-2xl text-amm-espresso">
-            Gastos & Costeador Inteligente
-          </h2>
-          <p className="text-xs text-amm-roast max-w-xl">
-            Calcula el costo real de tus ingredientes por porción, define tu margen deseado y obtén la propuesta óptima de precio de venta para garantizar la rentabilidad de Amm Café.
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE6DF] pb-5">
+        <div>
+          <h1 className="font-serif font-bold text-2xl text-amm-espresso tracking-tight">
+            Costeador & Gastos
+          </h1>
+          <p className="text-xs text-amm-roast mt-0.5">
+            Costeo de recetas, simulación de margen deseado y registro de egresos.
           </p>
         </div>
 
-        {/* Tab switch pills */}
-        <div className="flex items-center bg-amm-sand p-1.5 rounded-2xl border border-amm-latte self-stretch sm:self-auto">
+        {/* View Switcher Tabs */}
+        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#EAE6DF]">
           <button
             onClick={() => setActiveSubTab('costeador')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               activeSubTab === 'costeador'
-                ? 'bg-amm-mauve text-white shadow-soft'
+                ? 'bg-amm-mauve text-white'
                 : 'text-amm-roast hover:text-amm-espresso'
             }`}
           >
-            <Calculator className="w-4 h-4" />
-            <span>Costeador de Recetas</span>
+            Costeador de Recetas
           </button>
-
           <button
             onClick={() => setActiveSubTab('gastos')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               activeSubTab === 'gastos'
-                ? 'bg-amm-mauve text-white shadow-soft'
+                ? 'bg-amm-mauve text-white'
                 : 'text-amm-roast hover:text-amm-espresso'
             }`}
           >
-            <Receipt className="w-4 h-4" />
-            <span>Registro de Gastos</span>
+            Registro de Gastos
           </button>
         </div>
       </div>
 
-      {/* ======================= TAB: COSTEADOR INTELIGENTE ======================= */}
+      {/* ======================= TAB: COSTEADOR ======================= */}
       {activeSubTab === 'costeador' && (
         <div className="space-y-6">
           
-          {/* Recipe Selector Bar */}
+          {/* Recipe Selector Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             {recipes.map((rec) => (
               <button
                 key={rec.id}
                 onClick={() => handleSelectRecipe(rec.id)}
-                className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all shadow-xs border ${
+                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
                   rec.id === (activeRecipe?.id || '')
-                    ? 'bg-amm-espresso text-white border-amm-espresso shadow-soft scale-[1.02]'
-                    : 'bg-white text-amm-roast border-amm-latte hover:border-amm-mauve'
+                    ? 'bg-amm-espresso text-white border-amm-espresso'
+                    : 'bg-white text-amm-roast border-[#EAE6DF] hover:bg-[#FAF8F5]'
                 }`}
               >
                 {rec.productName}
@@ -225,50 +208,46 @@ export default function ExpensesView() {
           {activeRecipe && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* Left Column: Ingredients Breakdown Table (7 cols) */}
-              <div className="lg:col-span-7 bg-white rounded-3xl border border-amm-latte shadow-card overflow-hidden">
-                <div className="p-4 border-b border-amm-latte/60 flex items-center justify-between bg-amm-sand/30">
+              {/* Left: Recipe Ingredients Table (7 cols) */}
+              <div className="lg:col-span-7 bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
+                <div className="p-5 border-b border-[#F2ECE4] flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amm-mauve-dark">
-                      Ficha Técnica de Costeo
-                    </span>
-                    <h3 className="font-serif font-bold text-base text-amm-espresso">
+                    <h2 className="font-serif font-bold text-base text-amm-espresso">
                       {activeRecipe.productName}
-                    </h3>
+                    </h2>
+                    <span className="text-[11px] text-amm-roast capitalize">
+                      Categoría: {activeRecipe.category}
+                    </span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-xl bg-amm-sand text-amm-roast text-xs font-bold capitalize">
-                    {activeRecipe.category}
-                  </span>
                 </div>
 
-                <div className="p-4 space-y-4">
-                  {/* Ingredients Table */}
+                <div className="p-5 space-y-4">
+                  {/* Table */}
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-amm-sand/50 text-amm-roast uppercase tracking-wider text-[10px]">
+                    <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
                       <tr>
                         <th className="py-2.5 px-3">Ingrediente</th>
                         <th className="py-2.5 px-3">Porción</th>
-                        <th className="py-2.5 px-3">Costo ($)</th>
+                        <th className="py-2.5 px-3">Costo</th>
                         <th className="py-2.5 px-3 text-right"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-amm-latte/40">
+                    <tbody className="divide-y divide-[#F5F2EB]">
                       {activeRecipe.ingredients.map((ing) => (
-                        <tr key={ing.id} className="hover:bg-amm-cream/50 transition-colors">
-                          <td className="py-2.5 px-3 font-semibold text-amm-espresso">
+                        <tr key={ing.id} className="hover:bg-[#FAF8F5] transition-colors">
+                          <td className="py-2.5 px-3 font-medium text-amm-espresso">
                             {ing.name}
                           </td>
                           <td className="py-2.5 px-3 text-amm-roast">
                             {ing.quantity}
                           </td>
-                          <td className="py-2.5 px-3 font-bold text-amm-espresso">
+                          <td className="py-2.5 px-3 font-serif font-bold text-amm-espresso">
                             ${ing.cost.toFixed(2)}
                           </td>
                           <td className="py-2.5 px-3 text-right">
                             <button
                               onClick={() => handleRemoveIngredient(ing.id)}
-                              className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors"
-                              title="Eliminar ingrediente"
+                              className="text-amm-roast hover:text-rose-600 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -278,21 +257,21 @@ export default function ExpensesView() {
                     </tbody>
                   </table>
 
-                  {/* Add Ingredient Inline Form */}
-                  <form onSubmit={handleAddIngredient} className="p-3 bg-amm-sand/40 rounded-2xl border border-amm-latte/60 flex flex-wrap sm:flex-nowrap gap-2 items-center">
+                  {/* Add Inline Ingredient */}
+                  <form onSubmit={handleAddIngredient} className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE6DF] flex flex-wrap sm:flex-nowrap gap-2 items-center">
                     <input
                       type="text"
-                      placeholder="Nuevo ingrediente (ej. Vainilla)"
+                      placeholder="Ingrediente"
                       value={newIngName}
                       onChange={(e) => setNewIngName(e.target.value)}
-                      className="flex-2 px-3 py-1.5 text-xs rounded-xl border border-amm-latte bg-white"
+                      className="flex-2 px-3 py-1.5 text-xs rounded-lg border border-[#EAE6DF] bg-white"
                     />
                     <input
                       type="text"
-                      placeholder="Porción (ej. 20ml)"
+                      placeholder="Porción"
                       value={newIngQty}
                       onChange={(e) => setNewIngQty(e.target.value)}
-                      className="w-28 px-3 py-1.5 text-xs rounded-xl border border-amm-latte bg-white"
+                      className="w-24 px-3 py-1.5 text-xs rounded-lg border border-[#EAE6DF] bg-white"
                     />
                     <input
                       type="number"
@@ -300,20 +279,20 @@ export default function ExpensesView() {
                       placeholder="Costo $"
                       value={newIngCost}
                       onChange={(e) => setNewIngCost(e.target.value)}
-                      className="w-24 px-3 py-1.5 text-xs rounded-xl border border-amm-latte bg-white font-bold"
+                      className="w-20 px-3 py-1.5 text-xs rounded-lg border border-[#EAE6DF] bg-white font-bold"
                     />
                     <button
                       type="submit"
-                      className="px-3 py-1.5 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs shrink-0"
                     >
                       + Añadir
                     </button>
                   </form>
 
-                  {/* Direct Overheads: Waste and Packaging */}
+                  {/* Packaging & Waste inputs */}
                   <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="p-3 rounded-2xl bg-amm-cream border border-amm-latte space-y-1">
-                      <label className="text-[11px] font-bold text-amm-espresso">
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] space-y-1">
+                      <label className="text-[11px] font-semibold text-amm-espresso block">
                         Empaque / Desechables ($)
                       </label>
                       <input
@@ -321,150 +300,95 @@ export default function ExpensesView() {
                         step="any"
                         value={packagingCost}
                         onChange={(e) => setPackagingCost(parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-1 text-xs rounded-xl border border-amm-latte bg-white font-bold text-amm-espresso"
+                        className="w-full px-2.5 py-1 text-xs rounded-lg border border-[#EAE6DF] bg-white font-bold"
                       />
-                      <p className="text-[10px] text-amm-roast">Vaso, tapa, bolsa o servilleta</p>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-amm-cream border border-amm-latte space-y-1">
-                      <label className="text-[11px] font-bold text-amm-espresso">
-                        Merma / Desperdicio (%)
+                    <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] space-y-1">
+                      <label className="text-[11px] font-semibold text-amm-espresso block">
+                        Merma Estimada (%)
                       </label>
                       <input
                         type="number"
                         step="any"
                         value={wastePct}
                         onChange={(e) => setWastePct(parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-1 text-xs rounded-xl border border-amm-latte bg-white font-bold text-amm-espresso"
+                        className="w-full px-2.5 py-1 text-xs rounded-lg border border-[#EAE6DF] bg-white font-bold"
                       />
-                      <p className="text-[10px] text-amm-roast">Purga de café, leche evaporada...</p>
                     </div>
                   </div>
 
-                  {/* Cost Summary Box */}
-                  <div className="p-4 rounded-2xl bg-amm-sand border border-amm-latte space-y-1.5 text-xs">
-                    <div className="flex justify-between text-amm-roast">
-                      <span>Insumos directos:</span>
-                      <span className="font-semibold text-amm-espresso">${rawIngredientsCost.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-amm-roast">
-                      <span>Merma estimada ({wastePct}%):</span>
-                      <span className="font-semibold text-amm-espresso">${wasteCost.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-amm-roast">
-                      <span>Empaque / Vaso:</span>
-                      <span className="font-semibold text-amm-espresso">${packagingCost.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between font-extrabold text-sm text-amm-espresso pt-2 border-t border-amm-latte">
-                      <span>COSTO TOTAL UNITARIO:</span>
-                      <span className="text-amm-mauve-dark">${totalCost.toFixed(2)} MXN</span>
-                    </div>
+                  {/* Total Cost Strip */}
+                  <div className="p-4 rounded-xl bg-[#FCFBF9] border border-[#EAE6DF] flex items-center justify-between text-xs">
+                    <span className="font-semibold text-amm-espresso uppercase tracking-wider text-[11px]">
+                      Costo Total Unitario:
+                    </span>
+                    <span className="font-serif font-black text-lg text-amm-mauve-dark">
+                      ${totalCost.toFixed(2)} MXN
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Pricing Simulator & Proposal (5 cols) */}
-              <div className="lg:col-span-5 space-y-4">
-                
-                {/* Proposal Card */}
-                <div className="p-6 rounded-3xl bg-white border-2 border-amm-mauve/40 shadow-card space-y-5">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-2xl bg-amm-mint text-emerald-900">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-serif font-bold text-lg text-amm-espresso">
-                        Propuesta Inteligente
-                      </h3>
-                      <p className="text-xs text-amm-roast">
-                        Calculador automático de precio óptimo
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Target Margin Slider */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-amm-espresso">
-                        Margen Bruto Deseado:
-                      </span>
-                      <span className="font-extrabold text-sm text-amm-mauve-dark bg-amm-mauve-soft px-2.5 py-0.5 rounded-full">
-                        {targetMargin}%
-                      </span>
-                    </div>
-
-                    <input
-                      type="range"
-                      min="40"
-                      max="85"
-                      step="1"
-                      value={targetMargin}
-                      onChange={(e) => setTargetMargin(parseInt(e.target.value))}
-                      className="w-full accent-amm-mauve cursor-pointer"
-                    />
-
-                    <div className="flex justify-between text-[10px] text-amm-roast">
-                      <span>40% (Asequible)</span>
-                      <span>70% (Estándar Cafetería)</span>
-                      <span>85% (Alta rentabilidad)</span>
-                    </div>
-                  </div>
-
-                  {/* Price Comparison */}
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="p-3.5 rounded-2xl bg-amm-sand/60 border border-amm-latte text-center">
-                      <span className="text-[11px] text-amm-roast font-semibold">Precio Actual</span>
-                      <div className="text-2xl font-black text-amm-espresso my-1">
-                        ${currentPrice.toFixed(0)} <span className="text-xs font-normal">MXN</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-amm-roast">
-                        Margen: {currentMargin.toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-2xl bg-amm-mint/40 border border-amm-mint-dark/50 text-center ring-2 ring-emerald-500/20">
-                      <span className="text-[11px] text-emerald-950 font-bold uppercase tracking-wider">
-                        Sugerido Amm
-                      </span>
-                      <div className="text-2xl font-black text-emerald-900 my-1">
-                        ${Math.round(suggestedPrice)} <span className="text-xs font-normal">MXN</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-emerald-800">
-                        Ganancia: +${unitProfitSuggested.toFixed(2)}/pza
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Insight Message */}
-                  <div className="p-3.5 rounded-2xl bg-amm-cream border border-amm-latte text-xs space-y-1">
-                    <div className="flex items-center gap-1.5 font-bold text-amm-espresso">
-                      {currentPrice < suggestedPrice ? (
-                        <span className="text-amber-600 flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4" /> Recomendación de ajuste
-                        </span>
-                      ) : (
-                        <span className="text-emerald-700 flex items-center gap-1">
-                          <CheckCircle className="w-4 h-4" /> Margen saludable
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-amm-roast leading-relaxed">
-                      {currentPrice < suggestedPrice
-                        ? `Tu precio actual ($${currentPrice}) tiene un margen de ${currentMargin.toFixed(0)}%, por debajo del objetivo (${targetMargin}%). Proponemos ajustar a $${Math.round(suggestedPrice)} MXN.`
-                        : `Tu precio actual ($${currentPrice}) cubre el costo de $${totalCost.toFixed(2)} dejando una ganancia neta estimada de $${unitProfitCurrent.toFixed(2)} por unidad.`}
-                    </p>
-                  </div>
-
-                  {/* Action: Apply to Menu */}
-                  <button
-                    onClick={handleApplySuggestedPriceToMenu}
-                    className="w-full py-3 px-4 rounded-2xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs shadow-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    <span>Actualizar Precio en Menú POS (${Math.round(suggestedPrice)})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+              {/* Right: Simulator & Pricing Proposal (5 cols) */}
+              <div className="lg:col-span-5 bg-white rounded-2xl border border-[#EAE6DF] p-6 space-y-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amm-mauve" />
+                  <h2 className="font-serif font-bold text-base text-amm-espresso">
+                    Propuesta de Precio
+                  </h2>
                 </div>
 
+                {/* Margin Slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-amm-roast font-medium">Margen deseado:</span>
+                    <span className="font-bold text-amm-espresso bg-[#FAF8F5] px-2 py-0.5 rounded-md border border-[#EAE6DF]">
+                      {targetMargin}%
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="40"
+                    max="85"
+                    step="1"
+                    value={targetMargin}
+                    onChange={(e) => setTargetMargin(parseInt(e.target.value))}
+                    className="w-full accent-amm-mauve cursor-pointer"
+                  />
+                </div>
+
+                {/* Comparison Card */}
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] text-center">
+                    <span className="text-[11px] text-amm-roast block">Precio Actual</span>
+                    <div className="font-serif font-black text-xl text-amm-espresso my-1">
+                      ${currentPrice.toFixed(0)}
+                    </div>
+                    <span className="text-[10px] text-amm-roast block">
+                      Margen: {currentMargin.toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-[#EDFDF3] border border-[#86CCA0]/60 text-center">
+                    <span className="text-[11px] font-semibold text-emerald-900 block">Sugerido Amm</span>
+                    <div className="font-serif font-black text-xl text-emerald-900 my-1">
+                      ${Math.round(suggestedPrice)}
+                    </div>
+                    <span className="text-[10px] text-emerald-800 block">
+                      +${unitProfitSuggested.toFixed(2)} utilidad
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleApplySuggestedPriceToMenu}
+                  className="w-full py-3 px-4 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-soft"
+                >
+                  <span>Actualizar en Menú POS (${Math.round(suggestedPrice)})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
 
             </div>
@@ -473,43 +397,47 @@ export default function ExpensesView() {
         </div>
       )}
 
-      {/* ======================= TAB: REGISTRO DE GASTOS ======================= */}
+      {/* ======================= TAB: GASTOS ======================= */}
       {activeSubTab === 'gastos' && (
         <div className="space-y-6">
           
-          {/* KPI Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-5 rounded-3xl bg-white border border-amm-latte shadow-xs">
-              <span className="text-xs text-amm-roast font-semibold">Total Gastos Registrados</span>
-              <div className="text-3xl font-black text-rose-600 mt-1">
-                ${totalExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })} <span className="text-xs font-normal text-amm-roast">MXN</span>
+            <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+              <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+                Total Gastos
+              </span>
+              <div className="font-serif font-black text-2xl text-rose-700">
+                ${totalExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </div>
             </div>
 
-            <div className="p-5 rounded-3xl bg-white border border-amm-latte shadow-xs">
-              <span className="text-xs text-amm-roast font-semibold">Gastos Fijos (Renta, Luz, Internet)</span>
-              <div className="text-2xl font-black text-amm-espresso mt-1">
+            <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+              <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+                Gastos Fijos
+              </span>
+              <div className="font-serif font-black text-2xl text-amm-espresso">
                 ${fixedExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </div>
             </div>
 
-            <div className="p-5 rounded-3xl bg-white border border-amm-latte shadow-xs">
-              <span className="text-xs text-amm-roast font-semibold">Gastos Variables (Insumos, Compras)</span>
-              <div className="text-2xl font-black text-amm-mauve-dark mt-1">
+            <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+              <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
+                Gastos Variables
+              </span>
+              <div className="font-serif font-black text-2xl text-amm-mauve-dark">
                 ${variableExpenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </div>
             </div>
           </div>
 
-          {/* Expenses Table Container */}
-          <div className="bg-white rounded-3xl border border-amm-latte shadow-card overflow-hidden">
-            <div className="p-4 border-b border-amm-latte/60 flex items-center justify-between bg-amm-sand/30">
-              <h3 className="font-serif font-bold text-base text-amm-espresso">
+          <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
+            <div className="p-5 border-b border-[#F2ECE4] flex items-center justify-between">
+              <h2 className="font-serif font-bold text-base text-amm-espresso">
                 Historial de Egresos
-              </h3>
+              </h2>
               <button
                 onClick={() => setIsAddExpenseOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs shadow-soft transition-colors"
+                className="px-3.5 py-1.5 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Registrar Gasto</span>
@@ -518,39 +446,34 @@ export default function ExpensesView() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-amm-sand/50 text-amm-roast border-b border-amm-latte uppercase tracking-wider text-[10px]">
+                <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Fecha</th>
-                    <th className="py-3 px-4">Descripción</th>
-                    <th className="py-3 px-4">Categoría</th>
-                    <th className="py-3 px-4">Tipo</th>
-                    <th className="py-3 px-4">Método</th>
-                    <th className="py-3 px-4">Monto ($)</th>
-                    <th className="py-3 px-4 text-right">Acción</th>
+                    <th className="py-3 px-5">Fecha</th>
+                    <th className="py-3 px-5">Descripción</th>
+                    <th className="py-3 px-5">Categoría</th>
+                    <th className="py-3 px-5">Tipo</th>
+                    <th className="py-3 px-5">Monto</th>
+                    <th className="py-3 px-5 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-amm-latte/40 text-amm-espresso">
+                <tbody className="divide-y divide-[#F5F2EB] text-amm-espresso">
                   {expenses.map((exp) => (
-                    <tr key={exp.id} className="hover:bg-amm-cream/50 transition-colors">
-                      <td className="py-3 px-4 text-amm-roast font-medium">{exp.date}</td>
-                      <td className="py-3 px-4 font-bold">{exp.description}</td>
-                      <td className="py-3 px-4 capitalize text-amm-roast">{exp.category}</td>
-                      <td className="py-3 px-4 capitalize">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          exp.type === 'fijo' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
+                    <tr key={exp.id} className="hover:bg-[#FAF8F5] transition-colors">
+                      <td className="py-3.5 px-5 text-amm-roast">{exp.date}</td>
+                      <td className="py-3.5 px-5 font-medium">{exp.description}</td>
+                      <td className="py-3.5 px-5 capitalize text-amm-roast">{exp.category}</td>
+                      <td className="py-3.5 px-5 capitalize">
+                        <span className="text-[11px] text-amm-roast">
                           {exp.type}
                         </span>
                       </td>
-                      <td className="py-3 px-4 capitalize text-amm-roast">{exp.paidVia}</td>
-                      <td className="py-3 px-4 font-black text-rose-600">
+                      <td className="py-3.5 px-5 font-serif font-bold text-rose-700">
                         -${exp.amount.toFixed(2)}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-5 text-right">
                         <button
                           onClick={() => deleteExpense(exp.id)}
-                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50"
-                          title="Eliminar gasto"
+                          className="text-amm-roast hover:text-rose-600 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -567,31 +490,36 @@ export default function ExpensesView() {
 
       {/* Modal: Add Expense */}
       {isAddExpenseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-card border border-amm-latte p-6 space-y-4">
-            <h3 className="font-serif font-bold text-lg text-amm-espresso">
-              Registrar Nuevo Gasto
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-sm w-full border border-[#EAE6DF] p-6 space-y-4 shadow-card">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F2ECE4]">
+              <h3 className="font-serif font-bold text-base text-amm-espresso">
+                Registrar Gasto
+              </h3>
+              <button onClick={() => setIsAddExpenseOpen(false)}>
+                <X className="w-4 h-4 text-amm-roast" />
+              </button>
+            </div>
 
             <form onSubmit={handleAddExpenseSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-amm-espresso mb-1">
-                  Descripción *
+                <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                  Descripción
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej: Compra de café Chiapas, Pago de luz..."
+                  placeholder="Ej: Compra de insumos, luz..."
                   value={expDesc}
                   onChange={(e) => setExpDesc(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream focus:bg-white"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
-                    Monto ($ MXN) *
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                    Monto ($)
                   </label>
                   <input
                     type="number"
@@ -600,21 +528,21 @@ export default function ExpensesView() {
                     placeholder="0.00"
                     value={expAmount}
                     onChange={(e) => setExpAmount(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-white font-bold"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-white font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
                     Categoría
                   </label>
                   <select
                     value={expCategory}
                     onChange={(e) => setExpCategory(e.target.value as any)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
                     <option value="insumos">Insumos</option>
-                    <option value="servicios">Servicios (Luz/Agua/Gas)</option>
+                    <option value="servicios">Servicios</option>
                     <option value="renta">Renta</option>
                     <option value="sueldos">Sueldos</option>
                     <option value="mantenimiento">Mantenimiento</option>
@@ -623,50 +551,50 @@ export default function ExpensesView() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
-                    Tipo de Gasto
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                    Tipo
                   </label>
                   <select
                     value={expType}
                     onChange={(e) => setExpType(e.target.value as any)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
                     <option value="variable">Variable</option>
-                    <option value="fijo">Fijo Mensual</option>
+                    <option value="fijo">Fijo</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-amm-espresso mb-1">
-                    Pagado con
+                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
+                    Método
                   </label>
                   <select
                     value={expPaidVia}
                     onChange={(e) => setExpPaidVia(e.target.value as any)}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-amm-latte bg-amm-cream"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
-                    <option value="efectivo">Efectivo de Caja</option>
-                    <option value="tarjeta">Tarjeta Negocio</option>
-                    <option value="transferencia">Transferencia SPEI</option>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="tarjeta">Tarjeta</option>
+                    <option value="transferencia">Transferencia</option>
                   </select>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-3">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsAddExpenseOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-amm-latte text-xs font-bold text-amm-roast"
+                  className="flex-1 py-2 rounded-xl border border-[#EAE6DF] text-xs font-semibold text-amm-roast"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white text-xs font-bold shadow-soft"
+                  className="flex-1 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white text-xs font-bold"
                 >
-                  Guardar Gasto
+                  Guardar
                 </button>
               </div>
             </form>

@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import Navbar from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
 import PosView from '@/components/pos/PosView';
 import DashboardView from '@/components/dashboard/DashboardView';
 import CatalogView from '@/components/catalog/CatalogView';
@@ -10,9 +10,11 @@ import InventoryView from '@/components/inventory/InventoryView';
 import ExpensesView from '@/components/expenses/ExpensesView';
 import RecommendationsView from '@/components/recommendations/RecommendationsView';
 import CashShiftView from '@/components/cash-shift/CashShiftView';
+import { Menu, X } from 'lucide-react';
 
 export default function Home() {
-  const { role, activeTab } = useApp();
+  const { role, activeTab, setActiveTab } = useApp();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -36,19 +38,43 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-1">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#FAF8F5]">
+      
+      {/* Desktop & Tablet Architectural Sidebar */}
+      <div className="hidden md:flex">
+        <Sidebar />
+      </div>
+
+      {/* Mobile Top Header */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[#EAE6DF]">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo.svg" alt="Amm Café" className="w-8 h-8 object-contain" />
+          <span className="font-serif font-bold text-lg text-amm-espresso">Amm Café</span>
+        </div>
+
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-xl text-amm-espresso hover:bg-[#FAF8F5]"
+        >
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile Slideout Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex">
+          <div className="w-72 bg-white h-full p-4 flex flex-col justify-between shadow-card">
+            <Sidebar />
+          </div>
+          <div className="flex-1" onClick={() => setIsMobileMenuOpen(false)} />
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-x-hidden">
         {renderContent()}
       </main>
-      <footer className="py-6 border-t border-amm-latte/60 text-center text-xs text-amm-roast bg-white/50">
-        <p className="font-serif italic text-amm-espresso">
-          Amm Café • Pan, Café & Bocados
-        </p>
-        <p className="text-[11px] text-amm-roast/70 mt-0.5">
-          Punto de Venta & Sistema Administrativo • Diseñado con colores de marca #9C8DAC y #C9F4D3
-        </p>
-      </footer>
+
     </div>
   );
 }

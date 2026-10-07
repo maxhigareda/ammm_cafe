@@ -18,18 +18,18 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-card border border-amm-latte flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-amm-espresso/30 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-xl border border-amm-latte/60 flex flex-col max-h-[92vh]">
         
         {/* Top actions bar */}
-        <div className="p-4 border-b border-amm-latte/60 flex items-center justify-between bg-amm-sand/30 shrink-0">
-          <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
-            <Check className="w-4 h-4 bg-emerald-100 p-0.5 rounded-full" />
-            <span>Venta Registrada Exitosamente</span>
+        <div className="px-5 py-3.5 border-b border-amm-latte/40 flex items-center justify-between bg-amm-cream/20 shrink-0">
+          <div className="flex items-center gap-2 text-emerald-800 font-medium text-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Venta Registrada</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-amm-sand text-amm-roast transition-colors"
+            className="p-1 rounded-lg hover:bg-amm-latte/30 text-amm-roast transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -138,18 +138,18 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
         </div>
 
         {/* Bottom Actions */}
-        <div className="p-4 bg-amm-sand/50 border-t border-amm-latte flex items-center gap-3 shrink-0">
+        <div className="p-4 bg-white border-t border-amm-latte/60 flex items-center gap-2.5 shrink-0">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 px-4 rounded-2xl border border-amm-latte bg-white hover:bg-amm-sand text-amm-espresso font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+            className="flex-1 py-2 px-3 rounded-xl border border-amm-latte bg-white hover:bg-amm-cream text-amm-espresso font-medium text-xs flex items-center justify-center gap-2 transition-colors"
           >
-            <Printer className="w-4 h-4 text-amm-mauve" />
+            <Printer className="w-3.5 h-3.5 text-amm-roast" />
             <span>Imprimir Ticket</span>
           </button>
 
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 px-4 rounded-2xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-bold text-xs transition-colors shadow-soft"
+            className="flex-1 py-2 px-3 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-medium text-xs transition-colors shadow-sm"
           >
             Nueva Venta
           </button>
