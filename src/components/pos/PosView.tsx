@@ -35,9 +35,12 @@ export default function PosView() {
     cartCount,
     collaboratorName,
     setCollaboratorName,
+    categories,
+    role,
+    setActiveTab,
   } = useApp();
 
-  const [selectedCategory, setSelectedCategory] = useState<Category>('todos');
+  const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeProductForModifier, setActiveProductForModifier] = useState<Product | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -46,14 +49,9 @@ export default function PosView() {
   const [isMobileCartDrawerOpen, setIsMobileCartDrawerOpen] = useState(false);
   const [drawerAlert, setDrawerAlert] = useState<string | null>(null);
 
-  const categories: { id: Category; label: string }[] = [
+  const categoryTabs = [
     { id: 'todos', label: 'Todo el Menú' },
-    { id: 'cafe', label: 'Café & Especialidad' },
-    { id: 'panaderia', label: 'Panadería' },
-    { id: 'bocados', label: 'Bocados' },
-    { id: 'bebidas_frias', label: 'Bebidas Frías' },
-    { id: 'postres', label: 'Postres' },
-    { id: 'paquetes', label: 'Combos' },
+    ...categories,
   ];
 
   // Filter products
@@ -171,8 +169,8 @@ export default function PosView() {
           </div>
 
           {/* Minimal Category Tabs */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-[#EAE6DF]/60">
-            {categories.map((cat) => {
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-[#EAE6DF]/60 items-center">
+            {categoryTabs.map((cat) => {
               const isSelected = selectedCategory === cat.id;
 
               return (
@@ -189,6 +187,17 @@ export default function PosView() {
                 </button>
               );
             })}
+
+            {role === 'admin' && (
+              <button
+                onClick={() => setActiveTab('catalogo')}
+                className="px-2.5 py-1 text-xs font-semibold text-amm-mauve hover:text-amm-mauve-dark whitespace-nowrap transition-all border-b-2 border-transparent -mb-[1px] flex items-center gap-1 ml-1"
+                title="Ir a Catálogo para agregar o editar productos y categorías"
+              >
+                <Plus className="w-3 h-3" />
+                <span>+ Producto</span>
+              </button>
+            )}
           </div>
         </div>
 

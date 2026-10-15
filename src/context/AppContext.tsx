@@ -13,6 +13,7 @@ import {
   Expense,
   PricingRecipe,
   PaymentMethod,
+  CategoryItem,
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -23,6 +24,15 @@ import {
   INITIAL_ACTIVE_SHIFT,
 } from '../lib/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+export const DEFAULT_CATEGORIES: CategoryItem[] = [
+  { id: 'cafe', label: 'Café & Especialidad' },
+  { id: 'panaderia', label: 'Panadería' },
+  { id: 'bocados', label: 'Bocados' },
+  { id: 'bebidas_frias', label: 'Bebidas Frías' },
+  { id: 'postres', label: 'Postres' },
+  { id: 'paquetes', label: 'Combos' },
+];
 
 interface AppContextType {
   role: UserRole;
@@ -36,6 +46,12 @@ interface AppContextType {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   isSupabaseLive: boolean;
+
+  // Categories
+  categories: CategoryItem[];
+  addCategory: (label: string) => CategoryItem;
+  updateCategory: (id: string, newLabel: string) => void;
+  deleteCategory: (id: string) => void;
 
   // Products
   products: Product[];
@@ -126,7 +142,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState<string>('pos');
   const [isSupabaseLive, setIsSupabaseLive] = useState<boolean>(false);
 
-  // State loaded from localStorage or mockData
+  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -182,6 +198,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const savedCollab = localStorage.getItem('amm_collaborator');
       if (savedCollab) setCollaboratorNameState(savedCollab);
+
+      const savedCats = localStorage.getItem('amm_categories');
+      if (savedCats) {
+        try {
+          const parsed = JSON.parse(savedCats);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCategories(parsed);
+          }
+        } catch {}
+      }
     } catch {}
 
     // 2. If Supabase credentials are configured, fetch live tables
@@ -504,6 +530,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return p;
       })
     );
+  };
+
+  // Category Actions
+  const addCategory = (label: string): CategoryItem => {
+    const trimmed = label.trim();
+    if (!trimmed) return categories[0] || DEFAULT_CATEGORIES[0];
+
+    const cleanId = trimmed
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '') || `cat_${Date.now()}`;
+
+    const existing = categories.find((c) => c.id === cleanId || c.label.toLowerCase() === trimmed.toLowerCase());
+    if (existing) return existing;
+
+    const newCat: CategoryItem = { id: cleanId, label: trimmed };
+    const updated = [...categories, newCat];
+    setCategories(updated);
+    try {
+      localStorage.setItem('amm_categories', JSON.stringify(updated));
+    } catch {}
+    return newCat;
+  };
+
+  const updateCategory = (id: string, newLabel: string) => {
+    const trimmed = newLabel.trim();
+    if (!trimmed) return;
+    const updated = categories.map((c) => (c.id === id ? { ...c, label: trimmed } : c));
+    setCategories(updated);
+    try {
+      localStorage.setItem('amm_categories', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const deleteCategory = (id: string) => {
+    if (categories.length <= 1) return;
+    const updated = categories.filter((c) => c.id !== id);
+    setCategories(updated);
+    try {
+      localStorage.setItem('amm_categories', JSON.stringify(updated));
+    } catch {}
   };
 
   // Cart Actions
@@ -949,6 +1019,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeTab,
         setActiveTab,
         isSupabaseLive,
+        categories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
         products,
         addProduct,
         updateProduct,

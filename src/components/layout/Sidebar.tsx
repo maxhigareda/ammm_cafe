@@ -109,26 +109,46 @@ export default function Sidebar() {
             })}
           </div>
 
-          {/* Admin or Collaborator Sections */}
+          {/* Admin Sections */}
           <div className="space-y-1">
-            <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-amm-roast/70 block mb-2">
-              {role === 'admin' ? 'Administración' : 'Almacén'}
-            </span>
-            {(role === 'admin' ? adminTabs : collaboratorTabs).map((tab) => {
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amm-roast/70 block">
+                Administración
+              </span>
+              {role !== 'admin' && (
+                <span className="text-[9px] font-medium text-amm-roast/60 bg-[#F2ECE4] px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5" /> PIN
+                </span>
+              )}
+            </div>
+            {adminTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              const isLocked = role !== 'admin';
+
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                  onClick={() => {
+                    if (isLocked) {
+                      requestAdminAccess(() => setActiveTab(tab.id));
+                    } else {
+                      setActiveTab(tab.id);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? 'bg-amm-mauve/15 text-amm-mauve-dark font-bold'
                       : 'text-amm-roast hover:text-amm-espresso hover:bg-[#FAF8F5]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-amm-mauve-dark' : 'text-amm-roast'}`} />
-                  <span>{tab.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-amm-mauve-dark' : 'text-amm-roast'}`} />
+                    <span>{tab.label}</span>
+                  </div>
+                  {isLocked && (
+                    <Lock className="w-3.5 h-3.5 text-amm-roast/40 shrink-0" />
+                  )}
                 </button>
               );
             })}

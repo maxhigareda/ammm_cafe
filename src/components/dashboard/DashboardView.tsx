@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardView() {
-  const { sales, expenses } = useApp();
+  const { sales, expenses, categories } = useApp();
 
   const [dateFilter, setDateFilter] = useState<'hoy' | '7dias' | 'mes' | 'todo'>('hoy');
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
@@ -185,11 +185,11 @@ export default function DashboardView() {
               className="text-xs rounded-lg border border-[#EAE6DF] px-2.5 py-1 bg-[#FAF8F5] text-amm-espresso focus:outline-none"
             >
               <option value="todos">Todas las categorías</option>
-              <option value="cafe">Café</option>
-              <option value="panaderia">Panadería</option>
-              <option value="bocados">Bocados</option>
-              <option value="bebidas_frias">Bebidas Frías</option>
-              <option value="postres">Postres</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
             </select>
           </div>
 

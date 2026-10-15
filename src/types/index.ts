@@ -1,13 +1,11 @@
 export type UserRole = 'admin' | 'colaborador';
 
-export type Category = 
-  | 'todos'
-  | 'cafe' 
-  | 'panaderia' 
-  | 'bocados' 
-  | 'bebidas_frias' 
-  | 'postres' 
-  | 'paquetes';
+export type Category = string;
+
+export interface CategoryItem {
+  id: string;
+  label: string;
+}
 
 export interface ModifierOption {
   id: string;
@@ -30,7 +28,7 @@ export interface Product {
   name: string;
   size?: ProductSize | string;
   description: string;
-  category: Exclude<Category, 'todos'>;
+  category: string;
   price: number;
   cost: number;
   imageUrl: string;

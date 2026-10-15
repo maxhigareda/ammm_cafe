@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Product, Category } from '@/types';
+import { Product } from '@/types';
 import {
   Plus,
   Pencil,
@@ -11,22 +11,25 @@ import {
   Eye,
   EyeOff,
   X,
+  Tags,
 } from 'lucide-react';
 import { getProductSizeLabel } from '@/lib/productUtils';
+import CategoryManagerModal from './CategoryManagerModal';
 
 export default function CatalogView() {
-  const { products, addProduct, updateProduct, deleteProduct, toggleProductStock } = useApp();
+  const { products, addProduct, updateProduct, deleteProduct, toggleProductStock, categories } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Form State
   const [name, setName] = useState('');
   const [size, setSize] = useState<string>('mediano');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<Exclude<Category, 'todos'>>('cafe');
+  const [category, setCategory] = useState<string>('cafe');
   const [price, setPrice] = useState('');
   const [cost, setCost] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -44,7 +47,7 @@ export default function CatalogView() {
     setName('');
     setSize('mediano');
     setDescription('');
-    setCategory('cafe');
+    setCategory(categories[0]?.id || 'cafe');
     setPrice('');
     setCost('');
     setImageUrl('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80');
@@ -116,17 +119,27 @@ export default function CatalogView() {
             Catálogo & Menú
           </h1>
           <p className="text-xs text-amm-roast mt-0.5">
-            Alta, edición de precios y control de visibilidad en el punto de venta.
+            Alta, edición de precios y control de categorías y productos en el punto de venta.
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="px-4 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Nuevo Producto</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-white border border-[#EAE6DF] hover:bg-[#FAF8F5] text-amm-espresso font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
+          >
+            <Tags className="w-3.5 h-3.5 text-amm-mauve" />
+            <span>Categorías</span>
+          </button>
+
+          <button
+            onClick={handleOpenAdd}
+            className="px-4 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Nuevo Producto</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Strip */}
@@ -143,19 +156,37 @@ export default function CatalogView() {
         </div>
 
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 scrollbar-none">
-          {['todos', 'cafe', 'panaderia', 'bocados', 'bebidas_frias', 'postres', 'paquetes'].map((cat) => (
+          <button
+            onClick={() => setSelectedCategory('todos')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize whitespace-nowrap transition-all ${
+              selectedCategory === 'todos'
+                ? 'bg-amm-espresso text-white font-semibold'
+                : 'bg-white border border-[#EAE6DF] text-amm-roast hover:bg-[#FAF8F5]'
+            }`}
+          >
+            Todos
+          </button>
+          {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize whitespace-nowrap transition-all ${
-                selectedCategory === cat
+                selectedCategory === cat.id
                   ? 'bg-amm-espresso text-white font-semibold'
                   : 'bg-white border border-[#EAE6DF] text-amm-roast hover:bg-[#FAF8F5]'
               }`}
             >
-              {cat.replace('_', ' ')}
+              {cat.label}
             </button>
           ))}
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amm-mauve border border-dashed border-amm-mauve/40 hover:bg-amm-mauve/10 whitespace-nowrap transition-all flex items-center gap-1"
+            title="Administrar categorías"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Editar Categorías</span>
+          </button>
         </div>
       </div>
 
@@ -305,20 +336,28 @@ export default function CatalogView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-amm-espresso mb-1">
-                    Categoría
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-amm-espresso">
+                      Categoría
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryModalOpen(true)}
+                      className="text-[11px] text-amm-mauve hover:text-amm-mauve-dark font-medium underline"
+                    >
+                      + Gestionar
+                    </button>
+                  </div>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5]"
                   >
-                    <option value="cafe">Café</option>
-                    <option value="panaderia">Panadería</option>
-                    <option value="bocados">Bocados</option>
-                    <option value="bebidas_frias">Bebidas Frías</option>
-                    <option value="postres">Postres</option>
-                    <option value="paquetes">Combos</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -399,6 +438,12 @@ export default function CatalogView() {
           </div>
         </div>
       )}
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+      />
 
     </div>
   );
