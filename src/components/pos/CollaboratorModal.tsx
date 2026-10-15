@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, User, Check, Plus, Trash2 } from 'lucide-react';
+import { X, User, Check, Plus, Trash2, Pencil } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -26,6 +26,8 @@ export default function CollaboratorModal({
   const [team, setTeam] = useState<string[]>(DEFAULT_TEAM);
   const [newCollabName, setNewCollabName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState('');
 
   useEffect(() => {
     try {
@@ -41,6 +43,13 @@ export default function CollaboratorModal({
 
   if (!isOpen) return null;
 
+  const saveTeamToStorage = (updatedTeam: string[]) => {
+    setTeam(updatedTeam);
+    try {
+      localStorage.setItem('amm_team_members', JSON.stringify(updatedTeam));
+    } catch {}
+  };
+
   const handleSelect = (name: string) => {
     onSelectCollaborator(name);
     onClose();
@@ -52,10 +61,7 @@ export default function CollaboratorModal({
     if (!trimmed) return;
     if (!team.includes(trimmed)) {
       const updated = [...team, trimmed];
-      setTeam(updated);
-      try {
-        localStorage.setItem('amm_team_members', JSON.stringify(updated));
-      } catch {}
+      saveTeamToStorage(updated);
     }
     onSelectCollaborator(trimmed);
     setNewCollabName('');
@@ -63,13 +69,53 @@ export default function CollaboratorModal({
     onClose();
   };
 
+  const startEditing = (e: React.MouseEvent, index: number, name: string) => {
+    e.stopPropagation();
+    setEditingIndex(index);
+    setEditingName(name);
+  };
+
+  const saveEdit = (e: React.MouseEvent | React.FormEvent, index: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const trimmed = editingName.trim();
+    if (!trimmed) return;
+
+    const oldName = team[index];
+    const updated = [...team];
+    updated[index] = trimmed;
+    saveTeamToStorage(updated);
+
+    // If the one being edited was the currently active collaborator, update it
+    if (currentCollaborator.toLowerCase() === oldName.toLowerCase()) {
+      onSelectCollaborator(trimmed);
+    }
+
+    setEditingIndex(null);
+    setEditingName('');
+  };
+
+  const cancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingIndex(null);
+    setEditingName('');
+  };
+
   const handleDeleteCollab = (e: React.MouseEvent, nameToDelete: string) => {
     e.stopPropagation();
+    if (team.length <= 1) {
+      alert('Debe haber al menos un colaborador registrado.');
+      return;
+    }
     const updated = team.filter((n) => n !== nameToDelete);
-    setTeam(updated);
-    try {
-      localStorage.setItem('amm_team_members', JSON.stringify(updated));
-    } catch {}
+    saveTeamToStorage(updated);
+
+    // If deleting the active one, pick the first available
+    if (currentCollaborator.toLowerCase() === nameToDelete.toLowerCase()) {
+      if (updated.length > 0) {
+        onSelectCollaborator(updated[0]);
+      }
+    }
   };
 
   return (
@@ -83,10 +129,10 @@ export default function CollaboratorModal({
             </div>
             <div>
               <h3 className="font-serif font-bold text-base text-amm-espresso">
-                Colaborador en Turno
+                Colaboradores de Barra
               </h3>
               <p className="text-[11px] text-amm-roast">
-                Selecciona quién está cobrando en caja
+                Elige, renombra o añade al personal en turno
               </p>
             </div>
           </div>
@@ -99,9 +145,52 @@ export default function CollaboratorModal({
         </div>
 
         {/* Team list */}
-        <div className="p-5 space-y-2 max-h-[50vh] overflow-y-auto">
-          {team.map((name) => {
+        <div className="p-5 space-y-2.5 max-h-[55vh] overflow-y-auto">
+          {team.map((name, index) => {
             const isSelected = currentCollaborator.toLowerCase() === name.toLowerCase();
+            const isEditing = editingIndex === index;
+
+            if (isEditing) {
+              return (
+                <div
+                  key={`edit-${index}`}
+                  className="p-2.5 rounded-xl border border-amm-mauve bg-[#FAF8F5] space-y-2"
+                >
+                  <label className="block text-[10px] font-bold uppercase text-amm-mauve-dark">
+                    Renombrar colaborador:
+                  </label>
+                  <input
+                    type="text"
+                    autoFocus
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-[#EAE6DF] bg-white text-amm-espresso focus:outline-none focus:border-amm-mauve"
+                    placeholder="Escribe el nombre..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEdit(e, index);
+                      if (e.key === 'Escape') setEditingIndex(null);
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="flex-1 py-1 px-2 rounded-lg border border-[#EAE6DF] text-xs text-amm-roast hover:bg-white"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => saveEdit(e, index)}
+                      disabled={!editingName.trim()}
+                      className="flex-1 py-1 px-2 rounded-lg bg-amm-mauve text-white text-xs font-bold hover:bg-amm-mauve-dark disabled:opacity-50"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div
@@ -113,46 +202,69 @@ export default function CollaboratorModal({
                     : 'bg-[#FAF8F5] text-amm-espresso border-[#EAE6DF] hover:bg-white hover:border-amm-mauve/60'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">
                   <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-amm-sand text-amm-espresso'
                     }`}
                   >
                     {name.charAt(0)}
                   </div>
-                  <div>
-                    <span className="font-medium text-xs block">{name}</span>
+                  <div className="truncate">
+                    <span className="font-semibold text-xs block truncate">{name}</span>
                     <span
-                      className={`text-[10px] ${
+                      className={`text-[10px] block truncate ${
                         isSelected ? 'text-white/70' : 'text-amm-roast'
                       }`}
                     >
-                      {isSelected ? '● Atendiendo actualmente' : 'Colaborador'}
+                      {isSelected ? '● Atendiendo en caja' : 'Toca para seleccionar'}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  {isSelected ? (
-                    <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
-                  ) : (
-                    team.length > 2 && (
-                      <button
-                        onClick={(e) => handleDeleteCollab(e, name)}
-                        className="p-1 rounded text-amm-roast/40 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Eliminar de la lista"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )
+                {/* Actions: Edit name and Delete button (Always visible and touch-friendly) */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {/* Edit button */}
+                  <button
+                    type="button"
+                    onClick={(e) => startEditing(e, index, name)}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      isSelected
+                        ? 'text-white/80 hover:text-white hover:bg-white/10'
+                        : 'text-amm-roast hover:text-amm-espresso hover:bg-white border border-transparent hover:border-[#EAE6DF]'
+                    }`}
+                    title="Editar nombre"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Delete button (if more than 1) */}
+                  {team.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteCollab(e, name)}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        isSelected
+                          ? 'text-white/60 hover:text-rose-300 hover:bg-white/10'
+                          : 'text-amm-roast/60 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100'
+                      }`}
+                      title="Eliminar colaborador"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  {isSelected && (
+                    <div className="ml-1 pl-1 border-l border-white/20">
+                      <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
 
-          {/* Add custom collaborator */}
+          {/* Add custom collaborator button/form */}
           {!isAdding ? (
             <button
               onClick={() => setIsAdding(true)}
@@ -191,10 +303,10 @@ export default function CollaboratorModal({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer info */}
         <div className="p-3.5 border-t border-[#F2ECE4] bg-[#FCFBF9] text-center">
           <p className="text-[10px] text-amm-roast">
-            Las ventas y comandas se registrarán con el nombre seleccionado.
+            Puedes renombrar o eliminar cualquiera de los nombres de prueba tocando el lápiz o el basurero.
           </p>
         </div>
       </div>
