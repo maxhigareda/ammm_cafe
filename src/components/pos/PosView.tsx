@@ -178,6 +178,15 @@ export default function PosView() {
                       </span>
                     </div>
 
+                    {/* Distinctive Size underneath the title */}
+                    {prod.size && prod.size !== 'unico' && (
+                      <div className="mt-1">
+                        <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
+                          {prod.size === 'chico' ? 'Chico' : prod.size === 'mediano' ? 'Mediano' : prod.size === 'grande' ? 'Grande' : prod.size}
+                        </span>
+                      </div>
+                    )}
+
                     <p className="text-[11px] text-amm-roast line-clamp-2 mt-1 leading-relaxed">
                       {prod.description}
                     </p>
@@ -260,6 +269,12 @@ export default function PosView() {
                     <h4 className="font-medium text-xs text-amm-espresso leading-snug">
                       {item.product.name}
                     </h4>
+
+                    {item.product.size && item.product.size !== 'unico' && (
+                      <span className="inline-block text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] mt-0.5">
+                        {item.product.size === 'chico' ? 'Chico' : item.product.size === 'mediano' ? 'Mediano' : item.product.size === 'grande' ? 'Grande' : item.product.size}
+                      </span>
+                    )}
 
                     {/* Modifiers List */}
                     {Object.entries(item.selectedModifiers).map(([group, opts]) =>

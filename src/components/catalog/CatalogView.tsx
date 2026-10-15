@@ -23,6 +23,7 @@ export default function CatalogView() {
 
   // Form State
   const [name, setName] = useState('');
+  const [size, setSize] = useState<string>('mediano');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<Exclude<Category, 'todos'>>('cafe');
   const [price, setPrice] = useState('');
@@ -40,6 +41,7 @@ export default function CatalogView() {
   const handleOpenAdd = () => {
     setEditingProduct(null);
     setName('');
+    setSize('mediano');
     setDescription('');
     setCategory('cafe');
     setPrice('');
@@ -53,6 +55,7 @@ export default function CatalogView() {
   const handleOpenEdit = (prod: Product) => {
     setEditingProduct(prod);
     setName(prod.name);
+    setSize(prod.size || 'unico');
     setDescription(prod.description);
     setCategory(prod.category);
     setPrice(prod.price.toString());
@@ -74,6 +77,7 @@ export default function CatalogView() {
     if (editingProduct) {
       updateProduct(editingProduct.id, {
         name,
+        size: size || undefined,
         description,
         category,
         price: parsedPrice,
@@ -86,6 +90,7 @@ export default function CatalogView() {
     } else {
       addProduct({
         name,
+        size: size || undefined,
         description,
         category,
         price: parsedPrice,
@@ -193,6 +198,15 @@ export default function CatalogView() {
                     </span>
                   </div>
 
+                  {/* Distinctive Size Badge underneath the title */}
+                  {prod.size && prod.size !== 'unico' && (
+                    <div className="mt-1">
+                      <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
+                        {prod.size === 'chico' ? 'Chico' : prod.size === 'mediano' ? 'Mediano' : prod.size === 'grande' ? 'Grande' : prod.size}
+                      </span>
+                    </div>
+                  )}
+
                   <p className="text-[11px] text-amm-roast line-clamp-2 mt-1">
                     {prod.description}
                   </p>
@@ -256,6 +270,33 @@ export default function CatalogView() {
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#EAE6DF] bg-[#FAF8F5] focus:bg-white"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-amm-espresso mb-1.5">
+                  Tamaño de Porción
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { id: 'chico', label: 'Chico' },
+                    { id: 'mediano', label: 'Mediano' },
+                    { id: 'grande', label: 'Grande' },
+                    { id: 'unico', label: 'Único / N/A' },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSize(s.id)}
+                      className={`py-2 px-1 text-center rounded-xl border text-xs font-medium transition-all ${
+                        size === s.id
+                          ? 'bg-amm-mauve text-white border-amm-mauve shadow-xs font-bold'
+                          : 'bg-[#FAF8F5] text-amm-roast border-[#EAE6DF] hover:bg-white'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

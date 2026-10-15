@@ -135,7 +135,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // 1. Initial load from LocalStorage first for instant rendering
     try {
       const savedProducts = localStorage.getItem('amm_products');
-      if (savedProducts) setProducts(JSON.parse(savedProducts));
+      if (savedProducts) {
+        const parsed: Product[] = JSON.parse(savedProducts);
+        const enriched = parsed.map((p) => {
+          if (!p.size) {
+            const match = INITIAL_PRODUCTS.find((ip) => ip.id === p.id || ip.name.toLowerCase() === p.name.toLowerCase());
+            if (match?.size) return { ...p, size: match.size };
+            if (p.name.endsWith(' M') || p.name.endsWith(' m')) {
+              return { ...p, name: p.name.slice(0, -2).trim(), size: 'mediano' as const };
+            }
+            if (p.name.endsWith(' G') || p.name.endsWith(' g')) {
+              return { ...p, name: p.name.slice(0, -2).trim(), size: 'grande' as const };
+            }
+            if (p.name.endsWith(' CH') || p.name.endsWith(' Ch') || p.name.endsWith(' ch')) {
+              return { ...p, name: p.name.slice(0, -3).trim(), size: 'chico' as const };
+            }
+          }
+          return p;
+        });
+        setProducts(enriched);
+      }
 
       const savedSales = localStorage.getItem('amm_sales');
       if (savedSales) setSales(JSON.parse(savedSales));

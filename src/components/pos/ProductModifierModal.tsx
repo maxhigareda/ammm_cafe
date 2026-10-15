@@ -79,9 +79,16 @@ export default function ProductModifierModal({ product, isOpen, onClose, onAddTo
             <span className="text-[10px] font-bold uppercase tracking-wider text-amm-mauve-dark block">
               Personalizar
             </span>
-            <h3 className="font-serif font-bold text-lg text-amm-espresso">
-              {product.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-serif font-bold text-lg text-amm-espresso">
+                {product.name}
+              </h3>
+              {product.size && product.size !== 'unico' && (
+                <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
+                  {product.size === 'chico' ? 'Chico' : product.size === 'mediano' ? 'Mediano' : product.size === 'grande' ? 'Grande' : product.size}
+                </span>
+              )}
+            </div>
             <span className="text-xs text-amm-roast">
               Base: ${product.price.toFixed(2)} MXN
             </span>

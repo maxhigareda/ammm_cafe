@@ -23,9 +23,12 @@ export interface ModifierGroup {
   options: ModifierOption[];
 }
 
+export type ProductSize = 'chico' | 'mediano' | 'grande' | 'unico';
+
 export interface Product {
   id: string;
   name: string;
+  size?: ProductSize | string;
   description: string;
   category: Exclude<Category, 'todos'>;
   price: number;

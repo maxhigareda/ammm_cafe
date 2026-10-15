@@ -2,8 +2,21 @@ import { Product, SupplyItem, SupplyRequest, Expense, PricingRecipe, CashShift }
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
+    id: 'prod-0',
+    name: 'Café Americano de Especialidad',
+    size: 'mediano',
+    description: 'Doble shot de espresso chiapaneco sobre agua a temperatura óptima de infusión.',
+    category: 'cafe',
+    price: 48,
+    cost: 8.0,
+    imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+    inStock: true,
+    isDirectStock: false,
+  },
+  {
     id: 'prod-1',
     name: 'Latte Ammm Lavanda & Vainilla',
+    size: 'mediano',
     description: 'Espresso de especialidad, leche vaporizada, notas florales de lavanda y extracto natural de vainilla.',
     category: 'cafe',
     price: 68,
@@ -59,6 +72,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-2',
     name: 'Flat White Sedoso',
+    size: 'chico',
     description: 'Doble ristretto con microespuma de leche aterciopelada en taza de cerámica de 6 oz.',
     category: 'cafe',
     price: 55,
@@ -83,6 +97,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-3',
     name: 'Espresso Doble Origen',
+    size: 'chico',
     description: 'Extracción 1:2 con granos de Chiapas / Oaxaca con notas a chocolate amargo y cítricos dulces.',
     category: 'cafe',
     price: 42,
@@ -94,6 +109,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-4',
     name: 'Matcha Latte Ceremonial',
+    size: 'mediano',
     description: 'Matcha grado ceremonial de Uji con leche vaporizada y un toque sutil de miel de agave.',
     category: 'cafe',
     price: 72,
@@ -129,6 +145,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-5',
     name: 'Cold Brew Tonic & Cítricos',
+    size: 'grande',
     description: 'Maceración en frío por 18 hrs, servido sobre hielo con agua tónica premium y rodaja de naranja deshidratada.',
     category: 'bebidas_frias',
     price: 65,

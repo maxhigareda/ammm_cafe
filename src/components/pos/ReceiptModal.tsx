@@ -69,6 +69,11 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
                   <div className="flex justify-between font-bold">
                     <span>
                       {item.quantity}x {item.product.name}
+                      {item.product.size && item.product.size !== 'unico' && (
+                        <span className="text-[10px] text-amm-roast font-semibold uppercase ml-1">
+                          ({item.product.size})
+                        </span>
+                      )}
                     </span>
                     <span>${item.itemTotal.toFixed(2)}</span>
                   </div>
