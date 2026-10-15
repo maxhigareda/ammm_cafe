@@ -158,6 +158,16 @@ export default function Sidebar() {
             </div>
           </div>
 
+          {/* Active collaborator */}
+          <div className="flex items-center justify-between py-0.5">
+            <span className="text-amm-roast font-medium flex items-center gap-1">
+              <User className="w-3 h-3 text-amm-roast/70" /> En barra
+            </span>
+            <span className="text-[10px] font-bold text-amm-espresso truncate max-w-[120px]" title={collaboratorName}>
+              {collaboratorName}
+            </span>
+          </div>
+
           {/* Cloud sync status */}
           <div className="flex items-center justify-between py-0.5">
             <span className="text-amm-roast font-medium flex items-center gap-1">

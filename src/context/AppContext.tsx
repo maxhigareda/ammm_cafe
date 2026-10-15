@@ -116,7 +116,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const [collaboratorName, setCollaboratorName] = useState<string>('Sofía Méndez');
+  const [collaboratorName, setCollaboratorNameState] = useState<string>('Sofía Méndez');
+  const setCollaboratorName = (name: string) => {
+    setCollaboratorNameState(name);
+    try {
+      localStorage.setItem('amm_collaborator', name);
+    } catch {}
+  };
   const [activeTab, setActiveTab] = useState<string>('pos');
   const [isSupabaseLive, setIsSupabaseLive] = useState<boolean>(false);
 
@@ -173,6 +179,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const savedRecipes = localStorage.getItem('amm_recipes');
       if (savedRecipes) setRecipes(JSON.parse(savedRecipes));
+
+      const savedCollab = localStorage.getItem('amm_collaborator');
+      if (savedCollab) setCollaboratorNameState(savedCollab);
     } catch {}
 
     // 2. If Supabase credentials are configured, fetch live tables

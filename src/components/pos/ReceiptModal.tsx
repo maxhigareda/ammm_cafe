@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sale } from '@/types';
-import { X, Printer, Check, Coffee } from 'lucide-react';
+import { X, Printer, Check, Coffee, LockOpen } from 'lucide-react';
 
 interface Props {
   sale: Sale | null;
@@ -17,15 +17,26 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
     window.print();
   };
 
+  const isCash = sale.paymentMethod === 'efectivo';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-amm-espresso/30 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-xl border border-amm-latte/60 flex flex-col max-h-[92vh]">
         
         {/* Top actions bar */}
         <div className="px-5 py-3.5 border-b border-amm-latte/40 flex items-center justify-between bg-amm-cream/20 shrink-0">
-          <div className="flex items-center gap-2 text-emerald-800 font-medium text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Venta Registrada</span>
+          <div className="flex items-center gap-2 font-medium text-xs">
+            {isCash ? (
+              <span className="flex items-center gap-1.5 text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <LockOpen className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Cajón de Dinero Abierto</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-emerald-800">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Venta Registrada</span>
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -148,10 +159,19 @@ export default function ReceiptModal({ sale, isOpen, onClose }: Props) {
         <div className="p-4 bg-white border-t border-amm-latte/60 flex items-center gap-2.5 shrink-0">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2 px-3 rounded-xl border border-amm-latte bg-white hover:bg-amm-cream text-amm-espresso font-medium text-xs flex items-center justify-center gap-2 transition-colors"
+            className="flex-1 py-2.5 px-3 rounded-xl border border-amm-latte bg-white hover:bg-amm-cream text-amm-espresso font-medium text-xs flex items-center justify-center gap-2 transition-colors"
           >
-            <Printer className="w-3.5 h-3.5 text-amm-roast" />
-            <span>Imprimir Ticket</span>
+            {isCash ? (
+              <>
+                <LockOpen className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Imprimir & Botar Cajón</span>
+              </>
+            ) : (
+              <>
+                <Printer className="w-3.5 h-3.5 text-amm-roast" />
+                <span>Imprimir Ticket</span>
+              </>
+            )}
           </button>
 
           <button

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { PaymentMethod, Sale } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { X, Banknote, CreditCard, ArrowRightLeft, CheckCircle2, Smartphone } from 'lucide-react';
+import { X, Banknote, CreditCard, ArrowRightLeft, CheckCircle2, Smartphone, LockOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface Props {
@@ -183,6 +183,11 @@ export default function CheckoutModal({ isOpen, onClose, onSaleCompleted }: Prop
                 <span className="font-serif font-black text-sm text-emerald-800">
                   ${change.toFixed(2)} MXN
                 </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[10px] text-emerald-800 bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                <LockOpen className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>El cajón de dinero se botará automáticamente al confirmar.</span>
               </div>
             </div>
           )}
