@@ -8,6 +8,7 @@
 CREATE TABLE IF NOT EXISTS public.products (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
+  size TEXT,
   description TEXT,
   category TEXT NOT NULL,
   price NUMERIC(10, 2) NOT NULL,

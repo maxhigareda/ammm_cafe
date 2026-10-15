@@ -12,6 +12,7 @@ import {
   EyeOff,
   X,
 } from 'lucide-react';
+import { getProductSizeLabel } from '@/lib/productUtils';
 
 export default function CatalogView() {
   const { products, addProduct, updateProduct, deleteProduct, toggleProductStock } = useApp();
@@ -55,7 +56,7 @@ export default function CatalogView() {
   const handleOpenEdit = (prod: Product) => {
     setEditingProduct(prod);
     setName(prod.name);
-    setSize(prod.size || 'unico');
+    setSize(prod.size || (['cafe', 'bebidas_frias'].includes(prod.category) ? 'mediano' : 'unico'));
     setDescription(prod.description);
     setCategory(prod.category);
     setPrice(prod.price.toString());
@@ -199,13 +200,16 @@ export default function CatalogView() {
                   </div>
 
                   {/* Distinctive Size Badge underneath the title */}
-                  {prod.size && prod.size !== 'unico' && (
-                    <div className="mt-1">
-                      <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
-                        {prod.size === 'chico' ? 'Chico' : prod.size === 'mediano' ? 'Mediano' : prod.size === 'grande' ? 'Grande' : prod.size}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const sizeLabel = getProductSizeLabel(prod);
+                    return sizeLabel ? (
+                      <div className="mt-1">
+                        <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
+                          {sizeLabel}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
 
                   <p className="text-[11px] text-amm-roast line-clamp-2 mt-1">
                     {prod.description}

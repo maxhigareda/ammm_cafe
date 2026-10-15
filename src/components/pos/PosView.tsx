@@ -21,6 +21,7 @@ import ProductModifierModal from './ProductModifierModal';
 import CheckoutModal from './CheckoutModal';
 import ReceiptModal from './ReceiptModal';
 import CollaboratorModal from './CollaboratorModal';
+import { getProductSizeLabel } from '@/lib/productUtils';
 
 export default function PosView() {
   const {
@@ -238,13 +239,16 @@ export default function PosView() {
                       </div>
 
                       {/* Distinctive Size underneath the title */}
-                      {prod.size && prod.size !== 'unico' && (
-                        <div className="mt-1">
-                          <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
-                            {prod.size === 'chico' ? 'Chico' : prod.size === 'mediano' ? 'Mediano' : prod.size === 'grande' ? 'Grande' : prod.size}
-                          </span>
-                        </div>
-                      )}
+                      {(() => {
+                        const sizeLabel = getProductSizeLabel(prod);
+                        return sizeLabel ? (
+                          <div className="mt-1">
+                            <span className="inline-flex items-center text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF]">
+                              {sizeLabel}
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
 
                       <p className="text-[11px] text-amm-roast line-clamp-2 mt-1 leading-relaxed">
                         {prod.description}
@@ -339,11 +343,14 @@ export default function PosView() {
                       {item.product.name}
                     </h4>
 
-                    {item.product.size && item.product.size !== 'unico' && (
-                      <span className="inline-block text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] mt-0.5">
-                        {item.product.size === 'chico' ? 'Chico' : item.product.size === 'mediano' ? 'Mediano' : item.product.size === 'grande' ? 'Grande' : item.product.size}
-                      </span>
-                    )}
+                    {(() => {
+                      const sizeLabel = getProductSizeLabel(item.product);
+                      return sizeLabel ? (
+                        <span className="inline-block text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] mt-0.5">
+                          {sizeLabel}
+                        </span>
+                      ) : null;
+                    })()}
 
                     {/* Modifiers List */}
                     {Object.entries(item.selectedModifiers).map(([group, opts]) =>
@@ -547,11 +554,14 @@ export default function PosView() {
                         {item.product.name}
                       </h4>
 
-                      {item.product.size && item.product.size !== 'unico' && (
-                        <span className="inline-block text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] mt-0.5">
-                          {item.product.size === 'chico' ? 'Chico' : item.product.size === 'mediano' ? 'Mediano' : item.product.size === 'grande' ? 'Grande' : item.product.size}
-                        </span>
-                      )}
+                      {(() => {
+                        const sizeLabel = getProductSizeLabel(item.product);
+                        return sizeLabel ? (
+                          <span className="inline-block text-[9px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] mt-0.5">
+                            {sizeLabel}
+                          </span>
+                        ) : null;
+                      })()}
 
                       {Object.entries(item.selectedModifiers).map(([group, opts]) =>
                         opts.map((opt) => (

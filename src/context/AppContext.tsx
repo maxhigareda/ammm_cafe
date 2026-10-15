@@ -192,21 +192,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const { data: prods, error: pErr } = await client.from('products').select('*');
           if (!pErr && prods && prods.length > 0) {
             setIsSupabaseLive(true);
+
+            // Read any locally known sizes to prevent Supabase from overwriting them
+            const localSizes: Record<string, string> = {};
+            try {
+              const raw = localStorage.getItem('amm_products');
+              if (raw) {
+                JSON.parse(raw).forEach((lp: any) => {
+                  if (lp.id && lp.size) localSizes[lp.id] = lp.size;
+                });
+              }
+            } catch {}
+
             setProducts(
-              prods.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                description: p.description || '',
-                category: p.category,
-                price: Number(p.price),
-                cost: Number(p.cost),
-                imageUrl: p.image_url,
-                inStock: p.in_stock,
-                stockQuantity: p.stock_quantity,
-                isDirectStock: p.is_direct_stock,
-                modifierGroups: p.modifier_groups || [],
-                recipeNotes: p.recipe_notes,
-              }))
+              prods.map((p: any) => {
+                let name = p.name || '';
+                let size = p.size || localSizes[p.id];
+
+                if (!size) {
+                  const match = INITIAL_PRODUCTS.find(
+                    (ip) => ip.id === p.id || ip.name.toLowerCase() === name.toLowerCase()
+                  );
+                  if (match?.size) size = match.size;
+                }
+
+                if (!size) {
+                  if (name.endsWith(' M') || name.endsWith(' m')) {
+                    name = name.slice(0, -2).trim();
+                    size = 'mediano';
+                  } else if (name.endsWith(' G') || name.endsWith(' g')) {
+                    name = name.slice(0, -2).trim();
+                    size = 'grande';
+                  } else if (name.endsWith(' CH') || name.endsWith(' Ch') || name.endsWith(' ch')) {
+                    name = name.slice(0, -3).trim();
+                    size = 'chico';
+                  } else if (['cafe', 'bebidas_frias'].includes(p.category)) {
+                    size = 'mediano';
+                  }
+                }
+
+                return {
+                  id: p.id,
+                  name,
+                  size,
+                  description: p.description || '',
+                  category: p.category,
+                  price: Number(p.price),
+                  cost: Number(p.cost),
+                  imageUrl: p.image_url,
+                  inStock: p.in_stock,
+                  stockQuantity: p.stock_quantity,
+                  isDirectStock: p.is_direct_stock,
+                  modifierGroups: p.modifier_groups || [],
+                  recipeNotes: p.recipe_notes,
+                };
+              })
             );
           }
 
@@ -392,7 +432,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProducts((prev) => [product, ...prev]);
 
     if (supabase) {
-      supabase.from('products').insert({
+      const client = supabase;
+      const payload: any = {
         id: product.id,
         name: product.name,
         description: product.description,
@@ -404,7 +445,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         stock_quantity: product.stockQuantity,
         is_direct_stock: product.isDirectStock,
         modifier_groups: product.modifierGroups || [],
-      }).then();
+      };
+      if (product.size) payload.size = product.size;
+      client.from('products').insert(payload).then(({ error }) => {
+        if (error && error.message?.includes('size')) {
+          delete payload.size;
+          client.from('products').insert(payload).then();
+        }
+      });
     }
   };
 
@@ -414,8 +462,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
 
     if (supabase) {
+      const client = supabase;
       const dbPayload: any = {};
       if (updated.name !== undefined) dbPayload.name = updated.name;
+      if (updated.size !== undefined) dbPayload.size = updated.size;
       if (updated.price !== undefined) dbPayload.price = updated.price;
       if (updated.cost !== undefined) dbPayload.cost = updated.cost;
       if (updated.inStock !== undefined) dbPayload.in_stock = updated.inStock;
@@ -425,7 +475,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (updated.imageUrl !== undefined) dbPayload.image_url = updated.imageUrl;
       if (updated.description !== undefined) dbPayload.description = updated.description;
 
-      supabase.from('products').update(dbPayload).eq('id', id).then();
+      client.from('products').update(dbPayload).eq('id', id).then(({ error }) => {
+        if (error && error.message?.includes('size')) {
+          delete dbPayload.size;
+          client.from('products').update(dbPayload).eq('id', id).then();
+        }
+      });
     }
   };
 
