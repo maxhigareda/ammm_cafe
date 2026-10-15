@@ -10,10 +10,18 @@ import InventoryView from '@/components/inventory/InventoryView';
 import ExpensesView from '@/components/expenses/ExpensesView';
 import RecommendationsView from '@/components/recommendations/RecommendationsView';
 import CashShiftView from '@/components/cash-shift/CashShiftView';
+import AdminPinModal from '@/components/layout/AdminPinModal';
 import { Menu, X } from 'lucide-react';
 
 export default function Home() {
-  const { role, activeTab, setActiveTab } = useApp();
+  const {
+    role,
+    activeTab,
+    setActiveTab,
+    isAdminPinModalOpen,
+    setIsAdminPinModalOpen,
+    handleAdminPinSuccess,
+  } = useApp();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderContent = () => {
@@ -74,6 +82,13 @@ export default function Home() {
       <main className="flex-1 flex flex-col overflow-x-hidden">
         {renderContent()}
       </main>
+
+      {/* Admin Security PIN Modal (01048) */}
+      <AdminPinModal
+        isOpen={isAdminPinModalOpen}
+        onClose={() => setIsAdminPinModalOpen(false)}
+        onSuccess={handleAdminPinSuccess}
+      />
 
     </div>
   );

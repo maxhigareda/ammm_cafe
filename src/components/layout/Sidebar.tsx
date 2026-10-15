@@ -14,6 +14,7 @@ import {
   User,
   CheckCircle2,
   Database,
+  Lock,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -25,6 +26,7 @@ export default function Sidebar() {
     activeShift,
     collaboratorName,
     isSupabaseLive,
+    requestAdminAccess,
   } = useApp();
 
   const isShiftOpen = activeShift?.status === 'abierta';
@@ -170,7 +172,11 @@ export default function Sidebar() {
         {/* Minimal Role Switcher */}
         <div className="bg-[#F2ECE4]/70 p-1 rounded-xl flex items-center text-xs">
           <button
-            onClick={() => setRole('admin')}
+            onClick={() => {
+              if (role !== 'admin') {
+                requestAdminAccess();
+              }
+            }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
               role === 'admin'
                 ? 'bg-white text-amm-espresso shadow-xs'
@@ -179,6 +185,7 @@ export default function Sidebar() {
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Admin</span>
+            {role !== 'admin' && <Lock className="w-3 h-3 text-amm-roast/60 ml-0.5" />}
           </button>
           <button
             onClick={() => {

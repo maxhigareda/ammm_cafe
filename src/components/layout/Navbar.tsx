@@ -17,7 +17,7 @@ import {
 import Image from 'next/image';
 
 export default function Navbar() {
-  const { role, setRole, activeTab, setActiveTab, activeShift, collaboratorName, setCollaboratorName, isSupabaseLive } = useApp();
+  const { role, setRole, activeTab, setActiveTab, activeShift, collaboratorName, setCollaboratorName, isSupabaseLive, requestAdminAccess } = useApp();
 
   const isShiftOpen = activeShift?.status === 'abierta';
 
@@ -124,7 +124,9 @@ export default function Navbar() {
             <div className="flex items-center bg-amm-sand p-1 rounded-2xl border border-amm-latte">
               <button
                 onClick={() => {
-                  setRole('admin');
+                  if (role !== 'admin') {
+                    requestAdminAccess();
+                  }
                 }}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
                   role === 'admin'

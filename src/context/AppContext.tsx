@@ -27,6 +27,10 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
+  isAdminPinModalOpen: boolean;
+  setIsAdminPinModalOpen: (open: boolean) => void;
+  requestAdminAccess: (onSuccessCallback?: () => void) => void;
+  handleAdminPinSuccess: () => void;
   collaboratorName: string;
   setCollaboratorName: (name: string) => void;
   activeTab: string;
@@ -87,7 +91,31 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<UserRole>('admin');
+  const [role, setRole] = useState<UserRole>('colaborador');
+  const [isAdminPinModalOpen, setIsAdminPinModalOpen] = useState<boolean>(false);
+  const [adminSuccessCallback, setAdminSuccessCallback] = useState<(() => void) | null>(null);
+
+  const requestAdminAccess = (onSuccessCallback?: () => void) => {
+    if (role === 'admin') {
+      if (onSuccessCallback) onSuccessCallback();
+      return;
+    }
+    if (onSuccessCallback) {
+      setAdminSuccessCallback(() => onSuccessCallback);
+    } else {
+      setAdminSuccessCallback(null);
+    }
+    setIsAdminPinModalOpen(true);
+  };
+
+  const handleAdminPinSuccess = () => {
+    setRole('admin');
+    if (adminSuccessCallback) {
+      adminSuccessCallback();
+      setAdminSuccessCallback(null);
+    }
+  };
+
   const [collaboratorName, setCollaboratorName] = useState<string>('Sofía Méndez');
   const [activeTab, setActiveTab] = useState<string>('pos');
   const [isSupabaseLive, setIsSupabaseLive] = useState<boolean>(false);
@@ -829,6 +857,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         role,
         setRole,
+        isAdminPinModalOpen,
+        setIsAdminPinModalOpen,
+        requestAdminAccess,
+        handleAdminPinSuccess,
         collaboratorName,
         setCollaboratorName,
         activeTab,
