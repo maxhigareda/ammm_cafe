@@ -153,8 +153,8 @@ export default function CatalogView() {
         </div>
       </div>
 
-      {/* Product Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Product Cards Grid (Balanced 2-3 columns with 2-line title wrap) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
         {filteredProducts.map((prod) => {
           const margin = prod.price > 0 ? (((prod.price - prod.cost) / prod.price) * 100).toFixed(0) : 0;
 
@@ -182,10 +182,13 @@ export default function CatalogView() {
               <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-xs sm:text-sm text-amm-espresso leading-snug line-clamp-1">
+                    <h3
+                      className="font-semibold text-xs sm:text-sm text-amm-espresso leading-snug line-clamp-2 min-h-[2.5rem] flex-1"
+                      title={prod.name}
+                    >
                       {prod.name}
                     </h3>
-                    <span className="font-serif font-bold text-xs sm:text-sm text-amm-espresso shrink-0">
+                    <span className="font-serif font-black text-xs sm:text-sm text-amm-espresso shrink-0 pt-0.5">
                       ${prod.price.toFixed(0)}
                     </span>
                   </div>

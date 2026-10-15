@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { PaymentMethod, Sale } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { X, Banknote, CreditCard, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
+import { X, Banknote, CreditCard, ArrowRightLeft, CheckCircle2, Smartphone } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface Props {
@@ -18,6 +18,7 @@ export default function CheckoutModal({ isOpen, onClose, onSaleCompleted }: Prop
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
   const [discount, setDiscount] = useState<number>(0);
   const [cashGiven, setCashGiven] = useState<string>('');
+  const [cardReference, setCardReference] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -120,8 +121,8 @@ export default function CheckoutModal({ isOpen, onClose, onSaleCompleted }: Prop
                     : 'bg-[#FAF8F5] text-amm-roast border-[#EAE6DF] hover:bg-white'
                 }`}
               >
-                <CreditCard className="w-4 h-4" />
-                <span>Tarjeta</span>
+                <Smartphone className="w-4 h-4" />
+                <span>Tarjeta / iPhone</span>
               </button>
 
               <button
@@ -134,7 +135,7 @@ export default function CheckoutModal({ isOpen, onClose, onSaleCompleted }: Prop
                 }`}
               >
                 <ArrowRightLeft className="w-4 h-4" />
-                <span>Transf.</span>
+                <span>Transf. SPEI</span>
               </button>
             </div>
           </div>
@@ -182,6 +183,73 @@ export default function CheckoutModal({ isOpen, onClose, onSaleCompleted }: Prop
                 <span className="font-serif font-black text-sm text-emerald-800">
                   ${change.toFixed(2)} MXN
                 </span>
+              </div>
+            </div>
+          )}
+
+          {/* Card / iPhone Tap to Pay Details */}
+          {paymentMethod === 'tarjeta' && (
+            <div className="space-y-3 bg-[#FCFBF9] p-3.5 rounded-xl border border-[#EAE6DF]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amm-espresso">
+                <div className="w-6 h-6 rounded-lg bg-amm-mauve/15 text-amm-mauve-dark flex items-center justify-center">
+                  <Smartphone className="w-3.5 h-3.5" />
+                </div>
+                <span>Cobro con iPhone (Tap to Pay) o Terminal</span>
+              </div>
+
+              <div className="text-[11px] text-amm-roast space-y-1.5 bg-white p-2.5 rounded-lg border border-[#F2ECE4]">
+                <div className="flex justify-between items-center text-xs pb-1 border-b border-[#F5F2EB]">
+                  <span className="font-medium text-amm-espresso">Monto en tu app de iPhone:</span>
+                  <span className="font-serif font-black text-sm text-amm-espresso">
+                    ${finalTotal.toFixed(2)} MXN
+                  </span>
+                </div>
+                <p className="leading-relaxed text-[10px] text-amm-roast/80 pt-0.5">
+                  1. Abre tu app en el iPhone (Clip, Mercado Pago o Tap to Pay).<br />
+                  2. Ingresa <strong>${finalTotal.toFixed(2)}</strong> y acerca la tarjeta contactless o Apple Pay del cliente.<br />
+                  3. Una vez aprobado en tu iPhone, presiona abajo "Confirmar Pago".
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-0.5">
+                <span className="text-[11px] text-amm-roast">Folio / Ref. (opcional):</span>
+                <input
+                  type="text"
+                  placeholder="Ej. Clip-4920"
+                  value={cardReference}
+                  onChange={(e) => setCardReference(e.target.value)}
+                  className="w-32 px-2.5 py-1 text-xs rounded-lg border border-[#EAE6DF] bg-white text-amm-espresso placeholder:text-amm-roast/40 focus:outline-none focus:border-amm-mauve text-right font-mono"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Transfer Details */}
+          {paymentMethod === 'transferencia' && (
+            <div className="space-y-3 bg-[#FCFBF9] p-3.5 rounded-xl border border-[#EAE6DF]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amm-espresso">
+                <div className="w-6 h-6 rounded-lg bg-amm-mauve/15 text-amm-mauve-dark flex items-center justify-center">
+                  <ArrowRightLeft className="w-3.5 h-3.5" />
+                </div>
+                <span>Transferencia Electrónica (SPEI)</span>
+              </div>
+
+              <div className="flex justify-between items-center text-xs bg-white p-2.5 rounded-lg border border-[#F2ECE4]">
+                <span className="text-amm-roast">Monto a transferir:</span>
+                <span className="font-serif font-black text-sm text-amm-espresso">
+                  ${finalTotal.toFixed(2)} MXN
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-0.5">
+                <span className="text-[11px] text-amm-roast">Folio / Rastreo (opcional):</span>
+                <input
+                  type="text"
+                  placeholder="Ej. SPEI-8291"
+                  value={cardReference}
+                  onChange={(e) => setCardReference(e.target.value)}
+                  className="w-32 px-2.5 py-1 text-xs rounded-lg border border-[#EAE6DF] bg-white text-amm-espresso placeholder:text-amm-roast/40 focus:outline-none focus:border-amm-mauve text-right font-mono"
+                />
               </div>
             </div>
           )}

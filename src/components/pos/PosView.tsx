@@ -133,8 +133,8 @@ export default function PosView() {
           </div>
         </div>
 
-        {/* Clean, Harmonious Product Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+        {/* Clean, Harmonious Product Cards Grid (Optimized 2-3 columns with 2-line title wrap) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {filteredProducts.map((prod) => {
             const isLowStock = prod.isDirectStock && prod.stockQuantity !== undefined && prod.stockQuantity <= 4;
             const isOutOfStock = !prod.inStock || (prod.isDirectStock && prod.stockQuantity === 0);
@@ -167,10 +167,13 @@ export default function PosView() {
                 <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-xs sm:text-sm text-amm-espresso leading-snug line-clamp-1">
+                      <h3
+                        className="font-semibold text-xs sm:text-sm text-amm-espresso leading-snug line-clamp-2 min-h-[2.5rem] flex-1"
+                        title={prod.name}
+                      >
                         {prod.name}
                       </h3>
-                      <span className="font-serif font-bold text-xs sm:text-sm text-amm-espresso shrink-0">
+                      <span className="font-serif font-black text-xs sm:text-sm text-amm-espresso shrink-0 pt-0.5">
                         ${prod.price.toFixed(0)}
                       </span>
                     </div>
