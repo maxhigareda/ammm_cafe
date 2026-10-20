@@ -130,13 +130,17 @@ export interface Expense {
 
 export interface PricingIngredient {
   id: string;
+  supplyId?: string;
   name: string;
   quantity: string;
+  amount?: number;
+  unit?: string;
   cost: number;
 }
 
 export interface PricingRecipe {
   id: string;
+  productId?: string;
   productName: string;
   category: string;
   ingredients: PricingIngredient[];

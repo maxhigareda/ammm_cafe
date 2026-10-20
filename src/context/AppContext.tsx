@@ -100,8 +100,9 @@ interface AppContextType {
 
   // Pricing / Simulator
   recipes: PricingRecipe[];
-  addRecipe: (recipe: Omit<PricingRecipe, 'id'>) => void;
+  addRecipe: (recipe: Omit<PricingRecipe, 'id'>) => PricingRecipe;
   updateRecipe: (id: string, updated: Partial<PricingRecipe>) => void;
+  deleteRecipe: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -979,6 +980,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         target_margin_percentage: newRec.targetMarginPercentage,
       }).then();
     }
+    return newRec;
   };
 
   const updateRecipe = (id: string, updated: Partial<PricingRecipe>) => {
@@ -1003,6 +1005,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return r;
       })
     );
+  };
+
+  const deleteRecipe = (id: string) => {
+    setRecipes((prev) => prev.filter((r) => r.id !== id));
+    if (supabase) {
+      supabase.from('pricing_recipes').delete().eq('id', id).then();
+    }
   };
 
   return (
@@ -1053,6 +1062,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         recipes,
         addRecipe,
         updateRecipe,
+        deleteRecipe,
       }}
     >
       {children}
