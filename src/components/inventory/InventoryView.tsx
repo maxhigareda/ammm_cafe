@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { SupplyItem, SupplyRequest } from '@/types';
+import { SupplyItem, SupplyRequest, Product } from '@/types';
 import {
   Package,
   Plus,
@@ -11,7 +11,11 @@ import {
   Search,
   Check,
   X,
+  Trash2,
+  Coffee,
+  AlertCircle,
 } from 'lucide-react';
+import { getProductSizeLabel } from '@/lib/productUtils';
 
 export default function InventoryView() {
   const {
@@ -19,15 +23,21 @@ export default function InventoryView() {
     supplies,
     updateSupplyStock,
     addSupply,
+    deleteSupply,
     supplyRequests,
     createSupplyRequest,
     updateSupplyRequestStatus,
     collaboratorName,
+    products,
+    updateProduct,
+    deleteProduct,
   } = useApp();
 
+  const [activeTab, setActiveTab] = useState<'insumos' | 'productos'>('insumos');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isAddSupplyModalOpen, setIsAddSupplyModalOpen] = useState(false);
+  const [toastAlert, setToastAlert] = useState<string | null>(null);
 
   // New Request Form State
   const [reqSupplyName, setReqSupplyName] = useState('');
@@ -43,11 +53,28 @@ export default function InventoryView() {
   const [newSupplyCost, setNewSupplyCost] = useState('150');
   const [newSupplyCategory, setNewSupplyCategory] = useState<SupplyItem['category']>('cafe_grano');
 
+  // Trigger feedback toast
+  const showToast = (message: string) => {
+    setToastAlert(message);
+    setTimeout(() => setToastAlert(null), 3500);
+  };
+
+  // Filter supplies
   const filteredSupplies = supplies.filter((s) =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const lowStockCount = supplies.filter((s) => s.currentStock <= s.minStock).length;
+  // Filter products with direct stock
+  const directStockProducts = products.filter((p) => p.isDirectStock);
+  const filteredProducts = directStockProducts.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const lowStockSuppliesCount = supplies.filter((s) => s.currentStock <= s.minStock).length;
+  const lowStockProductsCount = directStockProducts.filter((p) => (p.stockQuantity ?? 0) <= 3).length;
+  const totalLowStock = lowStockSuppliesCount + lowStockProductsCount;
   const pendingRequestsCount = supplyRequests.filter((r) => r.status === 'pendiente').length;
 
   const handleSendRequest = (e: React.FormEvent) => {
@@ -59,6 +86,7 @@ export default function InventoryView() {
     setReqQuantity('');
     setReqNotes('');
     setIsRequestModalOpen(false);
+    showToast('Reporte de insumo faltante enviado.');
   };
 
   const handleCreateSupply = (e: React.FormEvent) => {
@@ -76,11 +104,43 @@ export default function InventoryView() {
 
     setNewSupplyName('');
     setIsAddSupplyModalOpen(false);
+    showToast(`Insumo "${newSupplyName}" agregado al inventario.`);
+  };
+
+  const handleDeleteSupply = (id: string, name: string) => {
+    if (confirm(`¿Eliminar "${name}" del inventario? Ya no aparecerá en la lista de insumos.`)) {
+      deleteSupply(id);
+      showToast(`Insumo "${name}" eliminado del inventario.`);
+    }
+  };
+
+  const handleUpdateProductStock = (prod: Product, delta: number) => {
+    const current = prod.stockQuantity ?? 0;
+    const newQty = Math.max(0, current + delta);
+    updateProduct(prod.id, {
+      stockQuantity: newQty,
+      inStock: newQty > 0,
+    });
+  };
+
+  const handleDeleteProduct = (prod: Product) => {
+    if (confirm(`¿Eliminar "${prod.name}" del catálogo y menú? Ya no aparecerá en el punto de venta ni en inventario.`)) {
+      deleteProduct(prod.id);
+      showToast(`Producto "${prod.name}" eliminado del catálogo.`);
+    }
   };
 
   return (
     <div className="flex-1 p-6 lg:p-8 space-y-6 bg-[#FAF8F5]">
       
+      {/* Toast Alert */}
+      {toastAlert && (
+        <div className="fixed top-5 right-5 z-50 bg-amm-espresso text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-card flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 duration-200 border border-amm-mauve/40">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastAlert}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE6DF] pb-5">
         <div>
@@ -89,7 +149,7 @@ export default function InventoryView() {
           </h1>
           <p className="text-xs text-amm-roast mt-0.5">
             {role === 'admin'
-              ? 'Control de materias primas, costos y pedidos pendientes de la barra.'
+              ? 'Control de materias primas, stock de productos del menú y pedidos de la barra.'
               : 'Existencias de barra y reporte rápido de insumos faltantes para compra.'}
           </p>
         </div>
@@ -97,16 +157,16 @@ export default function InventoryView() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsRequestModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Reportar Faltante</span>
           </button>
 
-          {role === 'admin' && (
+          {role === 'admin' && activeTab === 'insumos' && (
             <button
               onClick={() => setIsAddSupplyModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-amm-mauve hover:bg-amm-mauve-dark text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Nuevo Insumo</span>
@@ -117,44 +177,56 @@ export default function InventoryView() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1 shadow-2xs">
           <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
-            Total Insumos
+            Insumos & Productos
           </span>
           <div className="font-serif font-black text-2xl text-amm-espresso">
-            {supplies.length}
+            {supplies.length + directStockProducts.length}
           </div>
+          <span className="text-[10px] text-amm-roast">
+            {supplies.length} insumos • {directStockProducts.length} prod. con stock
+          </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1 shadow-2xs">
           <span className="text-[11px] font-medium text-amber-800 uppercase tracking-wider block">
-            Stock Bajo
+            Stock Bajo / Faltante
           </span>
           <div className="font-serif font-black text-2xl text-amber-700">
-            {lowStockCount}
+            {totalLowStock}
           </div>
+          <span className="text-[10px] text-amm-roast">
+            {lowStockSuppliesCount} insumos • {lowStockProductsCount} productos
+          </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+        <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1 shadow-2xs">
           <span className="text-[11px] font-medium text-rose-800 uppercase tracking-wider block">
             Solicitudes Pendientes
           </span>
           <div className="font-serif font-black text-2xl text-rose-700">
             {pendingRequestsCount}
           </div>
+          <span className="text-[10px] text-amm-roast">
+            Reportadas por el equipo
+          </span>
         </div>
 
         {role === 'admin' ? (
-          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1 shadow-2xs">
             <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
               Valor Estimado Stock
             </span>
             <div className="font-serif font-black text-2xl text-amm-mauve-dark">
               ${supplies.reduce((sum, s) => sum + s.currentStock * s.unitCost, 0).toLocaleString('es-MX', { maximumFractionDigits: 0 })} <span className="text-xs font-sans font-normal text-amm-roast">MXN</span>
             </div>
+            <span className="text-[10px] text-amm-roast">
+              Basado en costo unitario
+            </span>
           </div>
         ) : (
-          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1">
+          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DF] space-y-1 shadow-2xs">
             <span className="text-[11px] font-medium text-amm-roast uppercase tracking-wider block">
               Estado de Barra
             </span>
@@ -168,7 +240,7 @@ export default function InventoryView() {
 
       {/* Pending Requests Section (if any) */}
       {supplyRequests.length > 0 && (
-        <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden shadow-2xs">
           <div className="p-5 border-b border-[#F2ECE4] flex items-center justify-between">
             <h2 className="font-serif font-bold text-base text-amm-espresso">
               Solicitudes de Compra del Equipo
@@ -230,98 +302,262 @@ export default function InventoryView() {
         </div>
       )}
 
-      {/* Supplies Table */}
-      <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden">
-        <div className="p-5 border-b border-[#F2ECE4] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 className="font-serif font-bold text-base text-amm-espresso">
-            Existencias de Insumos Base
-          </h2>
+      {/* Main Inventory Container with Tabs */}
+      <div className="bg-white rounded-2xl border border-[#EAE6DF] overflow-hidden shadow-2xs">
+        
+        {/* Table Top Toolbar: Tabs & Search */}
+        <div className="p-5 border-b border-[#F2ECE4] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#FCFBF9]">
+          
+          {/* Sub-tabs: Insumos vs Productos del Menú */}
+          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#EAE6DF] shadow-2xs self-start">
+            <button
+              onClick={() => setActiveTab('insumos')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                activeTab === 'insumos'
+                  ? 'bg-amm-espresso text-white shadow-xs'
+                  : 'text-amm-roast hover:text-amm-espresso'
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span>Insumos Base ({supplies.length})</span>
+            </button>
 
-          <div className="relative w-full sm:w-64">
+            <button
+              onClick={() => setActiveTab('productos')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                activeTab === 'productos'
+                  ? 'bg-amm-espresso text-white shadow-xs'
+                  : 'text-amm-roast hover:text-amm-espresso'
+              }`}
+            >
+              <Coffee className="w-3.5 h-3.5" />
+              <span>Productos con Stock ({directStockProducts.length})</span>
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative w-full md:w-64">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amm-roast/60" />
             <input
               type="text"
-              placeholder="Buscar insumo..."
+              placeholder={activeTab === 'insumos' ? 'Buscar insumo...' : 'Buscar producto...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#FAF8F5] border border-[#EAE6DF] focus:outline-none focus:border-amm-mauve"
+              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white border border-[#EAE6DF] focus:outline-none focus:border-amm-mauve"
             />
           </div>
+
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
-              <tr>
-                <th className="py-3 px-5">Insumo</th>
-                <th className="py-3 px-5">Categoría</th>
-                <th className="py-3 px-5">Existencia</th>
-                <th className="py-3 px-5">Mínimo</th>
-                <th className="py-3 px-5">Estado</th>
-                {role === 'admin' && (
-                  <>
-                    <th className="py-3 px-5">Costo Unitario</th>
-                    <th className="py-3 px-5 text-right">Ajuste</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F5F2EB] text-amm-espresso">
-              {filteredSupplies.map((item) => {
-                const isLow = item.currentStock <= item.minStock;
+        {/* TAB 1: INSUMOS BASE TABLE */}
+        {activeTab === 'insumos' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th className="py-3 px-5">Insumo</th>
+                  <th className="py-3 px-5">Categoría</th>
+                  <th className="py-3 px-5">Existencia</th>
+                  <th className="py-3 px-5">Mínimo</th>
+                  <th className="py-3 px-5">Estado</th>
+                  {role === 'admin' && (
+                    <>
+                      <th className="py-3 px-5">Costo Unitario</th>
+                      <th className="py-3 px-5 text-right">Ajuste & Borrar</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F5F2EB] text-amm-espresso">
+                {filteredSupplies.length > 0 ? (
+                  filteredSupplies.map((item) => {
+                    const isLow = item.currentStock <= item.minStock;
+                    const isZero = item.currentStock === 0;
 
-                return (
-                  <tr key={item.id} className="hover:bg-[#FAF8F5] transition-colors">
-                    <td className="py-3.5 px-5 font-medium">
-                      {item.name}
-                    </td>
-                    <td className="py-3.5 px-5 capitalize text-amm-roast">
-                      {item.category.replace('_', ' ')}
-                    </td>
-                    <td className="py-3.5 px-5 font-serif font-bold text-sm">
-                      {item.currentStock} <span className="text-xs font-sans font-normal text-amm-roast">{item.unit}</span>
-                    </td>
-                    <td className="py-3.5 px-5 text-amm-roast">
-                      {item.minStock} {item.unit}
-                    </td>
-                    <td className="py-3.5 px-5">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                        <span className={`text-[11px] font-medium ${isLow ? 'text-amber-700' : 'text-emerald-700'}`}>
-                          {isLow ? 'Faltante' : 'Óptimo'}
-                        </span>
-                      </div>
-                    </td>
-
-                    {role === 'admin' && (
-                      <>
-                        <td className="py-3.5 px-5 text-amm-roast">
-                          ${item.unitCost.toFixed(2)} / {item.unit}
+                    return (
+                      <tr key={item.id} className="hover:bg-[#FAF8F5] transition-colors">
+                        <td className="py-3.5 px-5 font-medium">
+                          {item.name}
                         </td>
-                        <td className="py-3.5 px-5 text-right">
-                          <div className="inline-flex items-center gap-1">
-                            <button
-                              onClick={() => updateSupplyStock(item.id, Math.max(0, item.currentStock - 1))}
-                              className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-[#FAF8F5] text-xs font-bold text-amm-roast flex items-center justify-center"
-                            >
-                              -
-                            </button>
-                            <button
-                              onClick={() => updateSupplyStock(item.id, item.currentStock + 1)}
-                              className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-[#FAF8F5] text-xs font-bold text-amm-roast flex items-center justify-center"
-                            >
-                              +
-                            </button>
+                        <td className="py-3.5 px-5 capitalize text-amm-roast">
+                          {item.category.replace('_', ' ')}
+                        </td>
+                        <td className="py-3.5 px-5 font-serif font-bold text-sm">
+                          {item.currentStock} <span className="text-xs font-sans font-normal text-amm-roast">{item.unit}</span>
+                        </td>
+                        <td className="py-3.5 px-5 text-amm-roast">
+                          {item.minStock} {item.unit}
+                        </td>
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${isZero ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                            <span className={`text-[11px] font-medium ${isZero ? 'text-rose-700 font-bold' : isLow ? 'text-amber-700' : 'text-emerald-700'}`}>
+                              {isZero ? 'Agotado (0)' : isLow ? 'Faltante' : 'Óptimo'}
+                            </span>
                           </div>
                         </td>
-                      </>
-                    )}
+
+                        {role === 'admin' && (
+                          <>
+                            <td className="py-3.5 px-5 text-amm-roast">
+                              ${item.unitCost.toFixed(2)} / {item.unit}
+                            </td>
+                            <td className="py-3.5 px-5 text-right">
+                              <div className="inline-flex items-center gap-1 justify-end">
+                                {/* Minus button */}
+                                <button
+                                  onClick={() => updateSupplyStock(item.id, Math.max(0, item.currentStock - 1))}
+                                  className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-white text-xs font-bold text-amm-roast flex items-center justify-center transition-colors"
+                                  title="Disminuir stock (-1)"
+                                >
+                                  -
+                                </button>
+                                {/* Plus button */}
+                                <button
+                                  onClick={() => updateSupplyStock(item.id, item.currentStock + 1)}
+                                  className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-white text-xs font-bold text-amm-roast flex items-center justify-center transition-colors"
+                                  title="Aumentar stock (+1)"
+                                >
+                                  +
+                                </button>
+                                {/* Delete button next to +- */}
+                                <button
+                                  onClick={() => handleDeleteSupply(item.id, item.name)}
+                                  className="w-6 h-6 rounded-lg border border-transparent hover:border-rose-200 hover:bg-rose-50 text-amm-roast hover:text-rose-600 flex items-center justify-center transition-colors ml-1"
+                                  title={`Eliminar "${item.name}" del inventario`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={role === 'admin' ? 7 : 5} className="py-8 text-center text-xs text-amm-roast italic">
+                      No se encontraron insumos con ese criterio.
+                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TAB 2: PRODUCTOS DEL MENÚ CON STOCK DIRECTO */}
+        {activeTab === 'productos' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#FCFBF9] text-amm-roast/80 border-b border-[#F2ECE4] uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th className="py-3 px-5">Producto</th>
+                  <th className="py-3 px-5">Categoría</th>
+                  <th className="py-3 px-5">Stock Disponible</th>
+                  <th className="py-3 px-5">Precio</th>
+                  <th className="py-3 px-5">Estado</th>
+                  {role === 'admin' && (
+                    <th className="py-3 px-5 text-right">Ajuste & Borrar</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F5F2EB] text-amm-espresso">
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((prod) => {
+                    const size = getProductSizeLabel(prod);
+                    const qty = prod.stockQuantity ?? 0;
+                    const isZero = qty === 0;
+                    const isLow = qty > 0 && qty <= 3;
+
+                    return (
+                      <tr key={prod.id} className="hover:bg-[#FAF8F5] transition-colors">
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-lg bg-[#F5F2EB] overflow-hidden shrink-0 border border-[#EAE6DF]">
+                              <img src={prod.imageUrl} alt={prod.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-amm-espresso">{prod.name}</span>
+                                {size && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#F2ECE4] text-amm-mauve-dark border border-[#EAE6DF] uppercase">
+                                    {size}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-amm-roast">Costo: ${prod.cost.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-5 capitalize text-amm-roast">
+                          {prod.category.replace('_', ' ')}
+                        </td>
+
+                        <td className="py-3.5 px-5 font-serif font-bold text-sm">
+                          {qty} <span className="text-xs font-sans font-normal text-amm-roast">pzas</span>
+                        </td>
+
+                        <td className="py-3.5 px-5 font-serif font-bold text-sm text-amm-espresso">
+                          ${prod.price.toFixed(0)}
+                        </td>
+
+                        <td className="py-3.5 px-5">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${isZero ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                            <span className={`text-[11px] font-medium ${isZero ? 'text-rose-700 font-bold' : isLow ? 'text-amber-700 font-semibold' : 'text-emerald-700'}`}>
+                              {isZero ? 'Agotado (0 pzas)' : isLow ? 'Stock Bajo' : 'Disponible'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {role === 'admin' && (
+                          <td className="py-3.5 px-5 text-right">
+                            <div className="inline-flex items-center gap-1 justify-end">
+                              {/* Minus button */}
+                              <button
+                                onClick={() => handleUpdateProductStock(prod, -1)}
+                                className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-white text-xs font-bold text-amm-roast flex items-center justify-center transition-colors"
+                                title="Disminuir stock (-1)"
+                              >
+                                -
+                              </button>
+                              {/* Plus button */}
+                              <button
+                                onClick={() => handleUpdateProductStock(prod, 1)}
+                                className="w-6 h-6 rounded-lg border border-[#EAE6DF] hover:bg-white text-xs font-bold text-amm-roast flex items-center justify-center transition-colors"
+                                title="Aumentar stock (+1)"
+                              >
+                                +
+                              </button>
+                              {/* Delete button next to +- */}
+                              <button
+                                onClick={() => handleDeleteProduct(prod)}
+                                className="w-6 h-6 rounded-lg border border-transparent hover:border-rose-200 hover:bg-rose-50 text-amm-roast hover:text-rose-600 flex items-center justify-center transition-colors ml-1"
+                                title={`Eliminar "${prod.name}" del menú`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={role === 'admin' ? 6 : 5} className="py-8 text-center text-xs text-amm-roast italic">
+                      No hay productos con control de stock directo registrados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
       </div>
 
       {/* Modal: Report Shortage */}

@@ -87,6 +87,7 @@ interface AppContextType {
   supplies: SupplyItem[];
   updateSupplyStock: (id: string, newStock: number) => void;
   addSupply: (supply: Omit<SupplyItem, 'id'>) => void;
+  deleteSupply: (id: string) => void;
 
   // Supply Requests
   supplyRequests: SupplyRequest[];
@@ -884,6 +885,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteSupply = (id: string) => {
+    setSupplies((prev) => prev.filter((s) => s.id !== id));
+    if (supabase) {
+      supabase.from('supplies').delete().eq('id', id).then();
+    }
+  };
+
   // Supply Requests
   const createSupplyRequest = (
     supplyName: string,
@@ -1053,6 +1061,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         supplies,
         updateSupplyStock,
         addSupply,
+        deleteSupply,
         supplyRequests,
         createSupplyRequest,
         updateSupplyRequestStatus,
